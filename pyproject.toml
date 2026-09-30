@@ -1,6 +1,6 @@
 [project]
 name = "boondmanager-mock"
-version = "0.11.0"
+version = "0.12.0"
 description = "BoondManager API mock — container image and installable Python package"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -12,6 +12,7 @@ license = "Apache-2.0"
 # gain immédiat de taille et de surface d'attaque.
 dependencies = [
     "fastapi>=0.115",
+    "jsonschema>=4.23",
     "uvicorn[standard]>=0.34",
 ]
 
@@ -25,6 +26,7 @@ dev = [
     "ruff>=0.8",
     "mypy>=1.13",
     "pyyaml>=6.0",
+    "types-jsonschema>=4.26.0.20260518",
 ]
 
 [build-system]

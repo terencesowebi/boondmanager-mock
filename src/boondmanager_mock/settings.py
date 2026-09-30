@@ -75,6 +75,10 @@ class Settings:
     # données pour les usages qui exigent un contenu stable à l'octet près.
     evolution_enabled: bool = True
     evolution_interval: float = 60.0
+    # Fichier d'état persistant. Vide : le monde repart de la graine à chaque
+    # démarrage. Renseigné : créations et modifications survivent au
+    # redémarrage (cf. persistance.py).
+    data_file: str = ""
 
     max_results_cap: int = 500
     default_max_results: int = 30
@@ -105,6 +109,7 @@ class Settings:
         self.compensation_mode = os.environ.get("BOOND_MOCK_COMPENSATION_MODE", "csv")
         self.evolution_enabled = _flag("BOOND_MOCK_EVOLUTION", True)
         self.evolution_interval = float(os.environ.get("BOOND_MOCK_EVOLUTION_INTERVAL", "60"))
+        self.data_file = os.environ.get("BOOND_MOCK_DATA_FILE", "")
 
 
 settings = Settings()

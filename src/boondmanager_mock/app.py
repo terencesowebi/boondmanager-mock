@@ -22,9 +22,11 @@ La surface reproduit les modules du fournisseur, CONFRONTÉE à la vraie API
 
 from __future__ import annotations
 
+import json
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
+from importlib import resources
 from typing import Any
 
 from fastapi import APIRouter, FastAPI, Request
@@ -32,6 +34,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .auth import basic_is_valid, jwt_is_valid
+from .ecriture import ECRITURES, RequeteInvalide, SpecEcriture, creer, modifier
 from .envelope import (
     PERIODES_PAR_DEFAUT,
     apply_incremental,
@@ -274,7 +277,7 @@ def _collection_items(dataset_key: str) -> list[dict[str, Any]]:
 #  Application
 # ─────────────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="BoondManager mock", version="0.11.0", docs_url="/docs")
+app = FastAPI(title="BoondManager mock", version="0.12.0", docs_url="/docs")
 api = APIRouter(prefix="/api")
 
 
@@ -503,17 +506,22 @@ def _detail(request: Request, spec: CollectionSpec, item_id: str) -> JSONRespons
         return error(403, request=request)
     for item in _collection_items(dataset_key):
         if item["id"] == item_id:
-            projection = PROJECTIONS_PROFIL.get(path_name)
-            enrichi = projection(item) if projection else item
-            module = MODULE_INCLUDED_DETAIL.get(path_name, dataset_key)
-            included = (
-                construire_included([enrichi], state.dataset, module, state.index_entites())
-                if spec.avec_included
-                else None
-            )
-            return JSONResponse(envelope_detail(enrichi, included))
+            return _profil(spec, item)
     # Message générique réel : "HTTP 404 (GET /api/resources/999999999)".
     return error(404, request=request)
+
+
+def _profil(spec: CollectionSpec, item: dict[str, Any]) -> JSONResponse:
+    """La fiche telle que la sert le profil — aussi la réponse d'une écriture."""
+    projection = PROJECTIONS_PROFIL.get(spec.chemin)
+    enrichi = projection(item) if projection else item
+    module = MODULE_INCLUDED_DETAIL.get(spec.chemin, spec.cle_dataset)
+    included = (
+        construire_included([enrichi], state.dataset, module, state.index_entites())
+        if spec.avec_included
+        else None
+    )
+    return JSONResponse(envelope_detail(enrichi, included))
 
 
 def _register(spec: CollectionSpec) -> None:
@@ -564,6 +572,104 @@ def _register(spec: CollectionSpec) -> None:
 
 for _spec in COLLECTIONS:
     _register(_spec)
+
+
+def _refus_prealable(request: Request, ecriture: SpecEcriture, chemin: str) -> JSONResponse | None:
+    """Pannes injectées, authentification, périmètre : dans cet ordre, comme en lecture."""
+    if (injected := _dispatch_injections(chemin, dict(request.query_params))) is not None:
+        return injected
+    if (denied := _check_auth(request)) is not None:
+        return denied
+    if ecriture.chemin in settings.forbidden_collections:
+        return error(403, request=request)
+    return None
+
+
+def _appliquer_ecriture(
+    request: Request,
+    ecriture: SpecEcriture,
+    operation: Callable[[Any], dict[str, Any] | None],
+    corps: Any,
+) -> JSONResponse:
+    with state.verrou:
+        try:
+            item = operation(corps)
+        except RequeteInvalide as refus:
+            return error(422, refus.detail, source={"parameter": refus.parametre})
+        if item is None:
+            return error(404, request=request)
+        state.invalider_caches()
+        return _profil(_COLLECTION_PAR_CHEMIN[ecriture.chemin], item)
+
+
+async def _ecrire(
+    request: Request,
+    ecriture: SpecEcriture,
+    chemin: str,
+    operation: Callable[[Any], dict[str, Any] | None],
+) -> JSONResponse:
+    """Le parcours commun d'une écriture. Le verrou sérialise les écritures : deux
+    créations simultanées calculeraient sinon le même identifiant."""
+    if (refus := _refus_prealable(request, ecriture, chemin)) is not None:
+        return refus
+    try:
+        corps = await request.json()
+    except ValueError:
+        return error(422, "422 - Invalid JSON body", source={"parameter": "data"})
+    return _appliquer_ecriture(request, ecriture, operation, corps)
+
+
+_COLLECTION_PAR_CHEMIN = {spec.chemin: spec for spec in COLLECTIONS}
+
+
+def _corps_documente(nom_schema: str) -> dict[str, Any]:
+    """Le schéma officiel du fournisseur comme corps de requête du contrat OpenAPI."""
+    schema = json.loads(
+        resources.files("boondmanager_mock.schemas").joinpath(nom_schema).read_text("utf-8")
+    )
+    schema.pop("$schema", None)
+    return {"requestBody": {"required": True, "content": {"application/json": {"schema": schema}}}}
+
+
+def _register_ecriture(ecriture: SpecEcriture) -> None:
+    """Création et modification — même raison d'être que `_register`."""
+    collection = _COLLECTION_PAR_CHEMIN[ecriture.chemin]
+
+    @api.post(
+        f"/{ecriture.chemin}",
+        name=f"create_{ecriture.cle_dataset}",
+        response_model=ItemEnvelope[collection.modele],  # type: ignore[name-defined]
+        responses=REPONSES_ERREUR,
+        summary=f"Create: {collection.singulier}",
+        openapi_extra=_corps_documente(ecriture.schema_creation),
+    )
+    async def _creer(request: Request) -> JSONResponse:
+        return await _ecrire(
+            request,
+            ecriture,
+            f"/api/{ecriture.chemin}",
+            lambda corps: creer(ecriture, state.dataset, state.index_entites(), corps),
+        )
+
+    @api.put(
+        f"/{ecriture.chemin}/{{item_id}}/information",
+        name=f"update_{ecriture.cle_dataset}_information",
+        response_model=ItemEnvelope[collection.modele],  # type: ignore[name-defined]
+        responses=REPONSES_ERREUR,
+        summary=f"Update information: {collection.singulier}",
+        openapi_extra=_corps_documente(ecriture.schema_modification),
+    )
+    async def _modifier(request: Request, item_id: str) -> JSONResponse:
+        return await _ecrire(
+            request,
+            ecriture,
+            f"/api/{ecriture.chemin}/{item_id}/information",
+            lambda corps: modifier(ecriture, state.dataset, state.index_entites(), item_id, corps),
+        )
+
+
+for _ecriture in ECRITURES:
+    _register_ecriture(_ecriture)
 
 
 @api.get(

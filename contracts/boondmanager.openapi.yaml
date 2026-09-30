@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: BoondManager mock
-  version: 0.11.0
+  version: 0.12.0
 paths:
   /health:
     get:
@@ -509,6 +509,460 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListEnvelope_Candidat_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    post:
+      summary: 'Create: candidate'
+      operationId: create_candidates_api_candidates_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - candidate
+                    attributes:
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_PROFIL.PROFIL_DATE
+                        civility:
+                          type: integer
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.civility
+                          database: TAB_PROFIL.PROFIL_CIVILITE
+                        firstName:
+                          type: string
+                          maxLength: 100
+                          minLength: 1
+                          database: TAB_PROFIL.PROFIL_PRENOM
+                        lastName:
+                          type: string
+                          maxLength: 100
+                          minLength: 1
+                          database: TAB_PROFIL.PROFIL_NOM
+                        state:
+                          type: integer
+                          minimum: 0.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.candidat
+                          database: TAB_PROFIL.PROFIL_ETAT
+                        stateReason:
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: 0.0
+                              database: TAB_PROFIL.PROFIL_STATE_REASON
+                            detail:
+                              type: string
+                              database: TAB_PROFIL.PROFIL_STATE_REASON_COMMENT
+                          type: object
+                        typeOf:
+                          type: integer
+                          minimum: -1.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.typeOf.resource
+                          database: TAB_PROFIL.PROFIL_TYPE
+                        email1:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_EMAIL
+                        email2:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_EMAIL2
+                        email3:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_EMAIL3
+                        phone1:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_TEL1
+                        phone2:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_TEL2
+                        phone3:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_TEL3
+                        fax:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_FAX
+                        address:
+                          type: string
+                          maxLength: 250
+                          database: TAB_PROFIL.PROFIL_ADR
+                        postcode:
+                          type: string
+                          maxLength: 10
+                          database: TAB_PROFIL.PROFIL_CP
+                        town:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_VILLE
+                        country:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/country
+                          database: TAB_PROFIL.PROFIL_PAYS
+                        subDivision:
+                          type: string
+                          maxLength: 6
+                          database: TAB_PROFIL.PROFIL_SUBDIVISION
+                        source:
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1.0
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.source
+                              database: TAB_PROFIL.PARAM_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_PROFIL.PARAM_SOURCE
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - typeOf
+                          - detail
+                        dateOfBirth:
+                          type: string
+                          pattern: ^|[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                          database: TAB_PROFIL.PROFIL_DATENAISSANCE
+                        mobilityAreas:
+                          items:
+                            type: string
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.mobilityArea
+                          type: array
+                          description: List of mobilities {id}
+                          database: TAB_PROFIL.PARAM_MOBILITE
+                        globalEvaluation:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.evaluation
+                          database: TAB_PROFIL.PROFIL_STATUT
+                        evaluations:
+                          items:
+                            anyOf:
+                            - properties:
+                                notations:
+                                  items:
+                                    properties:
+                                      criteria:
+                                        type: integer
+                                        minimum: 0.0
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.criteria
+                                      evaluation:
+                                        type: string
+                                        maxLength: 100
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.evaluation
+                                    additionalProperties: false
+                                    type: object
+                                    required:
+                                    - criteria
+                                    - evaluation
+                                  type: array
+                                  uniqueItems: true
+                                  database: TAB_NOTATION.NOTATION_NOTES
+                                date:
+                                  type: string
+                                  pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                                  database: TAB_NOTATION.NOTATION_DATE
+                                comments:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_NOTATION.NOTATION_COMMENTAIRE
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - notations
+                              - date
+                              - comments
+                              description: Create an evaluation
+                            - properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_NOTATION.ID_NOTATION
+                                notations:
+                                  items:
+                                    properties:
+                                      criteria:
+                                        type: integer
+                                        minimum: 0.0
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.criteria
+                                      evaluation:
+                                        type: string
+                                        maxLength: 100
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.evaluation
+                                    additionalProperties: false
+                                    type: object
+                                    required:
+                                    - criteria
+                                    - evaluation
+                                  type: array
+                                  uniqueItems: true
+                                  database: TAB_NOTATION.NOTATION_NOTES
+                                date:
+                                  type: string
+                                  pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                                  database: TAB_NOTATION.NOTATION_DATE
+                                comments:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_NOTATION.NOTATION_COMMENTAIRE
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - notations
+                              - date
+                              - comments
+                              description: Update an evaluation
+                          type: array
+                        availability:
+                          type:
+                          - integer
+                          - string
+                          pattern: ^([0-9]{4}-[0-9]{2}-[0-9]{2})?$
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.availability
+                          database: TAB_PROFIL.PARAM_TYPEDISPO, TAB_PROFIL.PARAM_DATEDISPO
+                        isVisible:
+                          type: boolean
+                          database: TAB_PROFIL.PROFIL_VISIBILITE
+                        informationComments:
+                          type: string
+                          maxLength: 1000
+                          database: TAB_PROFIL.PARAM_COMMENTAIRE
+                        socialNetworks:
+                          items:
+                            properties:
+                              network:
+                                type: string
+                                enum:
+                                - facebook
+                                - viadeo
+                                - linkedin
+                                - x
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_NETWORK
+                              url:
+                                type: string
+                                maxLength: 250
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_URL
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - network
+                            - url
+                          type: array
+                          maxItems: 4
+                          minItems: 0
+                          uniqueItems: true
+                        tmpFile:
+                          type: string
+                          description: Temporary file ID to attach to candidate on
+                            create
+                      additionalProperties: false
+                      type: object
+                      required:
+                      - firstName
+                      - lastName
+                    relationships:
+                      properties:
+                        mainManager:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_PROFIL.ID_RESPMANAGER
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Candidate's main manager
+                        hrManager:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_PROFIL.ID_RESPRH
+                                  type:
+                                    type: string
+                                    enum:
+                                    - resource
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Candidate's hr manager
+                        agency:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_PROFIL.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Candidate's agency
+                        pole:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_PROFIL.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Candidate's pole
+                      additionalProperties: false
+                      type: object
+                  additionalProperties: false
+                  type: object
+                  required:
+                  - type
+                  - attributes
+              additionalProperties: false
+              type: object
+              required:
+              - data
+              description: Candidate's information data sent in the body with a POST
+                method
+              id: schemas/candidates/bodyPost.json
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Candidat_'
         '401':
           description: No credentials provided.
           content:
@@ -1101,6 +1555,364 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListEnvelope_Opportunite_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    post:
+      summary: 'Create: opportunity'
+      operationId: create_opportunities_api_opportunities_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - opportunity
+                    attributes:
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_AO.AO_DEPOT
+                        title:
+                          type: string
+                          maxLength: 150
+                          database: TAB_AO.AO_TITLE
+                        reference:
+                          type: string
+                          maxLength: 250
+                          database: TAB_AO.AO_REF
+                        state:
+                          type: integer
+                          minimum: 0.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.opportunity
+                          database: TAB_AO.AO_ETAT
+                        stateReason:
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: 0.0
+                              database: TAB_AO.AO_STATE_REASON
+                            detail:
+                              type: string
+                              database: TAB_AO.AO_STATE_REASON_COMMENT
+                          type: object
+                        typeOf:
+                          type: integer
+                          minimum: 1.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.typeOf.project
+                          database: TAB_AO.AO_TYPEREF
+                        origin:
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1.0
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.origin
+                              database: TAB_AO.AO_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_AO.AO_SOURCE
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - typeOf
+                          - detail
+                        expertiseArea:
+                          type: string
+                          description: Expertise area {id}
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.expertiseArea
+                          database: TAB_AO.AO_INTERVENTION
+                        activityAreas:
+                          items:
+                            type: string
+                            description: List of activity area {id}
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.activityArea
+                          type: array
+                          database: TAB_AO.AO_APPLICATIONS
+                        tools:
+                          items:
+                            type: string
+                            description: List of tools {id}
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.tool
+                          type: array
+                          database: TAB_AO.AO_OUTILS
+                        place:
+                          type: string
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.mobilityArea
+                          database: TAB_AO.AO_LIEU
+                        duration:
+                          type: integer
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.duration
+                          database: TAB_AO.AO_DUREE
+                        estimatesExcludingTax:
+                          type: number
+                          database: TAB_AO.AO_BUDGET
+                        turnoverEstimatedExcludingTax:
+                          type: number
+                          database: TAB_AO.AO_CA
+                        weighting:
+                          type: number
+                          database: TAB_AO.AO_PROBA
+                        isVisible:
+                          type: boolean
+                          database: TAB_AO.AO_VISIBILITE
+                        startDate:
+                          oneOf:
+                          - type: string
+                            pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                            database: TAB_AO.AO_TYPEDEBUT, TAB_AO.AO_DEBUT
+                          - type: string
+                            enum:
+                            - immediate
+                            database: TAB_AO.AO_TYPEDEBUT, TAB_AO.AO_DEBUT
+                        endDate:
+                          type: string
+                          pattern: ^|[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                          database: TAB_AO.AO_FIN
+                        currency:
+                          type: integer
+                          minimum: 0.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.currency
+                          database: TAB_AO.AO_DEVISE
+                        exchangeRate:
+                          type: number
+                          database: TAB_AO.AO_CHANGE
+                        currencyAgency:
+                          type: integer
+                          minimum: 0.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.currency
+                          database: TAB_AO.AO_DEVISEAGENCE
+                        exchangeRateAgency:
+                          type: number
+                          database: TAB_AO.AO_CHANGEAGENCE
+                      additionalProperties: false
+                      type: object
+                      required:
+                      - title
+                    relationships:
+                      properties:
+                        mainManager:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_AO.ID_PROFIL
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Opportunity's main manager
+                        agency:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_AO.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Opportunity's agency
+                        pole:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_AO.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Opportunity's pole
+                        company:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_AO.ID_CRMSOCIETE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - company
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Opportunity's company. If defined then opportunity's
+                              contact have to be set.
+                        contact:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_AO.ID_CRMCONTACT
+                                  type:
+                                    type: string
+                                    enum:
+                                    - contact
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Opportunity's contact. If defined then opportunity's
+                              company have to be set.
+                      additionalProperties: false
+                      type: object
+                  additionalProperties: false
+                  type: object
+                  required:
+                  - type
+                  - attributes
+              additionalProperties: false
+              type: object
+              required:
+              - data
+              description: Opportunity's information data sent in the body with a
+                POST method
+              id: schemas/opportunities/bodyPost.json
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Opportunite_'
         '401':
           description: No credentials provided.
           content:
@@ -2103,6 +2915,918 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /api/opportunities/{item_id}/information:
+    put:
+      summary: 'Update information: opportunity'
+      operationId: update_opportunities_information_api_opportunities__item_id__information_put
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Opportunite_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: Opportunity's information data sent in the body with a
+                PUT method
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      pattern: ^[1-9][0-9]*$
+                      database: TAB_AO.ID_AO
+                    type:
+                      type: string
+                      enum:
+                      - opportunity
+                    attributes:
+                      type: object
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_AO.AO_DEPOT
+                        title:
+                          type: string
+                          maxLength: 150
+                          database: TAB_AO.AO_TITLE
+                        workUnitRate:
+                          type: number
+                          database: TAB_AO.AO_TAUXHORAIRE
+                        reference:
+                          type: string
+                          maxLength: 250
+                          database: TAB_AO.AO_REF
+                        state:
+                          type: integer
+                          minimum: 0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.opportunity
+                          database: TAB_AO.AO_ETAT
+                        stateReason:
+                          type: object
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: 0
+                              database: TAB_AO.AO_STATE_REASON
+                            detail:
+                              type: string
+                              database: TAB_AO.AO_STATE_REASON_COMMENT
+                        typeOf:
+                          type: integer
+                          minimum: 1
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.typeOf.project
+                          database: TAB_AO.AO_TYPEREF
+                        origin:
+                          type: object
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.origin
+                              database: TAB_AO.AO_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_AO.AO_SOURCE
+                          required:
+                          - typeOf
+                          - detail
+                          additionalProperties: false
+                        description:
+                          type: string
+                          maxLength: 65000
+                          database: TAB_AO.AO_DESCRIPTION
+                        criteria:
+                          type: string
+                          maxLength: 5000
+                          database: TAB_AO.AO_CRITERES
+                        expertiseArea:
+                          description: Expertise area {id}
+                          type: string
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.expertiseArea
+                          database: TAB_AO.AO_INTERVENTION
+                        activityAreas:
+                          type: array
+                          items:
+                            description: List of activity area {id}
+                            type: string
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.activityArea
+                          database: TAB_AO.AO_APPLICATIONS
+                        tools:
+                          type: array
+                          items:
+                            description: List of tools {id}
+                            type: string
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.tool
+                          database: TAB_AO.AO_OUTILS
+                        place:
+                          type: string
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.mobilityArea
+                          database: TAB_AO.AO_LIEU
+                        duration:
+                          type: integer
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.duration
+                          database: TAB_AO.AO_DUREE
+                        estimatesExcludingTax:
+                          type: number
+                          database: TAB_AO.AO_BUDGET
+                        turnoverEstimatedExcludingTax:
+                          type: number
+                          database: TAB_AO.AO_CA
+                        weighting:
+                          type: number
+                          database: TAB_AO.AO_PROBA
+                        isVisible:
+                          type: boolean
+                          database: TAB_AO.AO_VISIBILITE
+                        startDate:
+                          oneOf:
+                          - type: string
+                            pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                            database: TAB_AO.AO_TYPEDEBUT, TAB_AO.AO_DEBUT
+                          - type: string
+                            enum:
+                            - immediate
+                            database: TAB_AO.AO_TYPEDEBUT, TAB_AO.AO_DEBUT
+                        endDate:
+                          type: string
+                          pattern: ^|[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                          database: TAB_AO.AO_FIN
+                        closingDate:
+                          type: string
+                          pattern: ^|[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                          database: TAB_AO.AO_DATECLOSING
+                        answerDate:
+                          type: string
+                          pattern: ^|[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                          database: TAB_AO.AO_DATECLOSING
+                        currency:
+                          type: integer
+                          minimum: 0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.currency
+                          database: TAB_AO.AO_DEVISE
+                        exchangeRate:
+                          type: number
+                          database: TAB_AO.AO_CHANGE
+                        currencyAgency:
+                          type: integer
+                          minimum: 0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.currency
+                          database: TAB_AO.AO_DEVISEAGENCE
+                        exchangeRateAgency:
+                          type: number
+                          database: TAB_AO.AO_CHANGEAGENCE
+                        positioningSuggestFilters:
+                          description: Filters for positioning suggest
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              module:
+                                type: string
+                              params:
+                                type: object
+                                additionalProperties: true
+                        forceWeighting:
+                          description: If true then weighting is not automatically
+                            updated based on state, but set manually
+                          type: boolean
+                          database: TAB_AO.AO_FORCEPROBA
+                      additionalProperties: false
+                    relationships:
+                      type: object
+                      properties:
+                        mainManager:
+                          description: Opportunity's main manager
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_AO.ID_PROFIL
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        hrManager:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Opportunity's hr manager
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_AO.ID_PROFIL
+                                  type:
+                                    type: string
+                                    enum:
+                                    - resource
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                        agency:
+                          description: Opportunity's agency
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_AO.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        pole:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Opportunity's pole
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_AO.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                        company:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Opportunity's company. If defined then opportunity's
+                              contact have to be set.
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_AO.ID_CRMSOCIETE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - company
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                        contact:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Opportunity's contact. If defined then opportunity's
+                              company have to be set.
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_AO.ID_CRMCONTACT
+                                  type:
+                                    type: string
+                                    enum:
+                                    - contact
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                      additionalProperties: false
+                  required:
+                  - id
+                  - type
+                  additionalProperties: false
+              required:
+              - data
+              additionalProperties: false
+              id: schemas/opportunities/informationBodyPut.json
+  /api/candidates/{item_id}/information:
+    put:
+      summary: 'Update information: candidate'
+      operationId: update_candidates_information_api_candidates__item_id__information_put
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Candidat_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: Candidate's information data sent in the body with a PUT
+                method
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      pattern: ^[1-9][0-9]*$
+                      database: TAB_PROFIL.ID_PROFIL
+                    type:
+                      type: string
+                      enum:
+                      - candidate
+                    attributes:
+                      type: object
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_PROFIL.PROFIL_DATE
+                        civility:
+                          type: integer
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.civility
+                          database: TAB_PROFIL.PROFIL_CIVILITE
+                        firstName:
+                          type: string
+                          minLength: 1
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_PRENOM
+                        lastName:
+                          type: string
+                          minLength: 1
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_NOM
+                        title:
+                          type: string
+                          maxLength: 150
+                          database: TAB_DT.DT_TITRE
+                        state:
+                          type: integer
+                          minimum: 0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.candidat
+                          database: TAB_PROFIL.PROFIL_ETAT
+                        stateReason:
+                          type: object
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: 0
+                              database: TAB_PROFIL.PROFIL_STATE_REASON
+                            detail:
+                              type: string
+                              database: TAB_PROFIL.PROFIL_STATE_REASON_COMMENT
+                        email1:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_EMAIL
+                        email2:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_EMAIL2
+                        email3:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_EMAIL3
+                        phone1:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_TEL1
+                        phone2:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_TEL2
+                        phone3:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_TEL3
+                        fax:
+                          type: string
+                          maxLength: 20
+                          database: TAB_PROFIL.PROFIL_FAX
+                        address:
+                          description: /!\ Deprecated in information. Use administrative
+                            tab instead
+                          type: string
+                          maxLength: 250
+                          database: TAB_PROFIL.PROFIL_ADR
+                        postcode:
+                          type: string
+                          maxLength: 10
+                          database: TAB_PROFIL.PROFIL_CP
+                        town:
+                          type: string
+                          maxLength: 100
+                          database: TAB_PROFIL.PROFIL_VILLE
+                        country:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/country
+                          database: TAB_PROFIL.PROFIL_PAYS
+                        subDivision:
+                          type: string
+                          maxLength: 6
+                          database: TAB_PROFIL.PROFIL_SUBDIVISION
+                        source:
+                          type: object
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.source
+                              database: TAB_PROFIL.PARAM_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_PROFIL.PARAM_SOURCE
+                          required:
+                          - typeOf
+                          - detail
+                          additionalProperties: false
+                        dateOfBirth:
+                          type: string
+                          pattern: ^|[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                          database: TAB_PROFIL.PROFIL_DATENAISSANCE
+                        mobilityAreas:
+                          description: List of mobilities {id}
+                          type: array
+                          items:
+                            type: string
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.mobilityArea
+                          database: TAB_PROFIL.PARAM_MOBILITE
+                        globalEvaluation:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.evaluation
+                          database: TAB_PROFIL.PROFIL_STATUT
+                        evaluations:
+                          type: array
+                          items:
+                            anyOf:
+                            - description: Create an evaluation
+                              type: object
+                              properties:
+                                notations:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      criteria:
+                                        type: integer
+                                        minimum: 0
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.criteria
+                                      evaluation:
+                                        type: string
+                                        maxLength: 100
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.evaluation
+                                    required:
+                                    - criteria
+                                    - evaluation
+                                    additionalProperties: false
+                                  uniqueItems: true
+                                  database: TAB_NOTATION.NOTATION_NOTES
+                                date:
+                                  type: string
+                                  pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                                  database: TAB_NOTATION.NOTATION_DATE
+                                comments:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_NOTATION.NOTATION_COMMENTAIRE
+                              required:
+                              - notations
+                              - date
+                              - comments
+                              additionalProperties: false
+                            - description: Update an evaluation
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_NOTATION.ID_NOTATION
+                                notations:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      criteria:
+                                        type: integer
+                                        minimum: 0
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.criteria
+                                      evaluation:
+                                        type: string
+                                        maxLength: 100
+                                        links:
+                                          rel: describedBy
+                                          href: /api/application/dictionary/setting.evaluation
+                                    required:
+                                    - criteria
+                                    - evaluation
+                                    additionalProperties: false
+                                  uniqueItems: true
+                                  database: TAB_NOTATION.NOTATION_NOTES
+                                date:
+                                  type: string
+                                  pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
+                                  database: TAB_NOTATION.NOTATION_DATE
+                                comments:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_NOTATION.NOTATION_COMMENTAIRE
+                              required:
+                              - id
+                              - notations
+                              - date
+                              - comments
+                              additionalProperties: false
+                        availability:
+                          type:
+                          - integer
+                          - string
+                          pattern: ^([0-9]{4}-[0-9]{2}-[0-9]{2})?$
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.availability
+                          database: TAB_PROFIL.PARAM_TYPEDISPO, TAB_PROFIL.PARAM_DATEDISPO
+                        isVisible:
+                          type: boolean
+                          database: TAB_PROFIL.PROFIL_VISIBILITE
+                        informationComments:
+                          type: string
+                          maxLength: 1000
+                          database: TAB_PROFIL.PARAM_COMMENTAIRE
+                        socialNetworks:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              network:
+                                type: string
+                                enum:
+                                - facebook
+                                - viadeo
+                                - linkedin
+                                - x
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_NETWORK
+                              url:
+                                type: string
+                                maxLength: 250
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_URL
+                            required:
+                            - network
+                            - url
+                            additionalProperties: false
+                          uniqueItems: true
+                          minItems: 0
+                          maxItems: 4
+                        importResumes:
+                          type: boolean
+                          description: true to copy resumes to the new resource, depends
+                            on `state`
+                        importFiles:
+                          type: boolean
+                          description: true to copy files to the new resource, depends
+                            on `state`
+                        importContractFiles:
+                          type: boolean
+                          description: true to copy contract file to the new resource,
+                            depends on `state`
+                        importContract:
+                          type: boolean
+                          description: true to import candidate's contract into the
+                            updated resource when candidate is hired again
+                        importFields:
+                          type: array
+                          description: list of resource's fields to update from candidate
+                            when candidate is hired again
+                      additionalProperties: false
+                    relationships:
+                      type: object
+                      properties:
+                        mainManager:
+                          description: Candidate's main manager
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_PROFIL.ID_RESPMANAGER
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        hrManager:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Candidate's hr manager
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_PROFIL.ID_RESPRH
+                                  type:
+                                    type: string
+                                    enum:
+                                    - resource
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                        agency:
+                          description: Candidate's agency
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_PROFIL.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        pole:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Candidate's pole
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_PROFIL.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                      additionalProperties: false
+                  required:
+                  - id
+                  - type
+                  additionalProperties: false
+              required:
+              - data
+              additionalProperties: false
+              id: schemas/candidates/informationBodyPut.json
   /api/resources/{item_id}/administrative:
     get:
       summary: Administrative tab — THE official path to contracts

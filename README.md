@@ -121,6 +121,70 @@ the group linkage lives**: `parentCompany` + `subsidiaries`, observed
 ² the `startMonth`/`endMonth` window is REQUIRED — 422 with business code 1017
 otherwise, as in production.
 
+## Writing opportunities and candidates
+
+The vendor's write routes, as declared in the RAML:
+
+| Route | Effect |
+|---|---|
+| `POST /api/opportunities` | creates an opportunity (`title` required) |
+| `PUT /api/opportunities/{id}/information` | updates its information tab |
+| `POST /api/candidates` | creates a candidate (`firstName`, `lastName` required) |
+| `PUT /api/candidates/{id}/information` | updates its information tab |
+
+JSON:API bodies (`{"data": {"type", "attributes", "relationships"}}`; a `PUT`
+also carries `data.id`). Both answer **200 with the profile**, as the RAML
+declares — not 201.
+
+- **Validated against the vendor's own JSON schemas**, copied verbatim into
+  `src/boondmanager_mock/schemas/`. They declare `additionalProperties: false`:
+  an unknown attribute is **rejected (422)**, not ignored, so a client-side typo
+  shows up in tests instead of vanishing.
+- A relationship to an entity that does not exist → **422**, with the offending
+  path in `source.parameter`.
+- A created record has the **same shape** as the dataset's records (same
+  attribute and relationship keys), defaults to the token user as
+  `mainManager` and to that user's agency, and gets an `updateDate` **above the
+  collection maximum** — an incremental cursor sees it.
+- The candidate `import*` attributes are request options: accepted, never stored.
+
+```bash
+curl -X POST http://localhost:8000/api/opportunities \
+  -H "X-Jwt-Client-Boondmanager: <jwt>" -H 'Content-Type: application/json' \
+  -d '{"data": {"type": "opportunity", "attributes": {"title": "Data platform"}}}'
+```
+
+The 422 `code` and message for a schema violation are NOT observed on a real
+tenant (the comparison script only issues GETs): see
+[`docs/UNVERIFIED-FIELDS.md`](docs/UNVERIFIED-FIELDS.md).
+
+## Persistence — a development database
+
+By default the world is rebuilt from the seed at every start, which is what test
+suites want. Set `BOOND_MOCK_DATA_FILE` and the mock becomes a development
+database: whatever was created or modified — writes, `/__admin/mutate`, company
+life — is still there after a restart.
+
+```yaml
+services:
+  boondmanager-mock:
+    environment:
+      BOOND_MOCK_DATA_FILE: /data/state.json
+      BOOND_MOCK_EVOLUTION: "false"   # a stable dataset, unless you want it to live
+    volumes:
+      - boond-data:/data
+volumes:
+  boond-data:
+```
+
+- The file is a JSON snapshot rewritten after every mutation — written next to
+  the target, then **renamed**: a crash leaves the old state or the new one,
+  never a truncated file.
+- The evolution counter is saved with the data: a restart does **not** replay
+  events already applied.
+- `POST /__admin/reset` starts over from the seed **and overwrites the file**.
+- A missing, unreadable or other-format file starts over from the seed.
+
 ## The reproduced dialect
 
 | Aspect | Behaviour |
@@ -248,6 +312,7 @@ it.
 | `BOOND_MOCK_FORBIDDEN_COLLECTIONS` | — | collections answered with 403 — simulates a narrow-perimeter user token |
 | `BOOND_MOCK_COMPENSATION_MODE` | `csv` | `absent` / `csv` |
 | `BOOND_MOCK_RATE_LIMIT_AFTER` | — | permanent rate limit (reset baseline) |
+| `BOOND_MOCK_DATA_FILE` | — | state file surviving restarts (the image provides a writable `/data`) |
 
 Since 0.2.0, the `ophelie`/`insights360` profiles and their variables
 (`BOOND_MOCK_DATASET_PROFILE`, `BOOND_MOCK_UPN_DOMAIN`) are gone: one single

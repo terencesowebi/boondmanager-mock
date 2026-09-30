@@ -1,0 +1,432 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "description": "Opportunity's information data sent in the body with a POST method",
+    "type": "object",
+    "properties": {
+        "data": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "opportunity"
+                    ]
+                },
+                "attributes": {
+                    "type": "object",
+                    "properties": {
+                        "creationDate": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$",
+                            "database": "TAB_AO.AO_DEPOT"
+                        },
+                        "title": {
+                            "type": "string",
+                            "maxLength": 150,
+                            "database": "TAB_AO.AO_TITLE"
+                        },
+                        "reference": {
+                            "type": "string",
+                            "maxLength": 250,
+                            "database": "TAB_AO.AO_REF"
+                        },
+                        "state": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.state.opportunity"
+                            },
+                            "database": "TAB_AO.AO_ETAT"
+                        },
+                        "stateReason": {
+                            "type": "object",
+                            "properties": {
+                                "typeOf": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "database": "TAB_AO.AO_STATE_REASON"
+                                },
+                                "detail": {
+                                    "type": "string",
+                                    "database": "TAB_AO.AO_STATE_REASON_COMMENT"
+                                }
+                            }
+                        },
+                        "typeOf": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.typeOf.project"
+                            },
+                            "database": "TAB_AO.AO_TYPEREF"
+                        },
+                        "origin": {
+                            "type": "object",
+                            "properties": {
+                                "typeOf": {
+                                    "type": "integer",
+                                    "minimum": -1,
+                                    "links": {
+                                        "rel": "describedBy",
+                                        "href": "/api/application/dictionary/setting.origin"
+                                    },
+                                    "database": "TAB_AO.AO_TYPESOURCE"
+                                },
+                                "detail": {
+                                    "type": "string",
+                                    "maxLength": 100,
+                                    "database": "TAB_AO.AO_SOURCE"
+                                }
+                            },
+                            "required": [
+                                "typeOf",
+                                "detail"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "expertiseArea": {
+                            "description": "Expertise area {id}",
+                            "type": "string",
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.expertiseArea"
+                            },
+                            "database": "TAB_AO.AO_INTERVENTION"
+                        },
+                        "activityAreas": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of activity area {id}",
+                                "type": "string",
+                                "links": {
+                                    "rel": "describedBy",
+                                    "href": "/api/application/dictionary/setting.activityArea"
+                                }
+                            },
+                            "database": "TAB_AO.AO_APPLICATIONS"
+                        },
+                        "tools": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of tools {id}",
+                                "type": "string",
+                                "links": {
+                                    "rel": "describedBy",
+                                    "href": "/api/application/dictionary/setting.tool"
+                                }
+                            },
+                            "database": "TAB_AO.AO_OUTILS"
+                        },
+                        "place": {
+                            "type": "string",
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.mobilityArea"
+                            },
+                            "database": "TAB_AO.AO_LIEU"
+                        },
+                        "duration": {
+                            "type": "integer",
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.duration"
+                            },
+                            "database": "TAB_AO.AO_DUREE"
+                        },
+                        "estimatesExcludingTax": {
+                            "type": "number",
+                            "database": "TAB_AO.AO_BUDGET"
+                        },
+                        "turnoverEstimatedExcludingTax": {
+                            "type": "number",
+                            "database": "TAB_AO.AO_CA"
+                        },
+                        "weighting": {
+                            "type": "number",
+                            "database": "TAB_AO.AO_PROBA"
+                        },
+                        "isVisible": {
+                            "type": "boolean",
+                            "database": "TAB_AO.AO_VISIBILITE"
+                        },
+                        "startDate": {
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                    "database": "TAB_AO.AO_TYPEDEBUT, TAB_AO.AO_DEBUT"
+                                },
+                                {
+                                    "type": "string",
+                                    "enum": [
+                                        "immediate"
+                                    ],
+                                    "database": "TAB_AO.AO_TYPEDEBUT, TAB_AO.AO_DEBUT"
+                                }
+                            ]
+                        },
+                        "endDate": {
+                            "type": "string",
+                            "pattern": "^|[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "database": "TAB_AO.AO_FIN"
+                        },
+                        "currency": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.currency"
+                            },
+                            "database": "TAB_AO.AO_DEVISE"
+                        },
+                        "exchangeRate": {
+                            "type": "number",
+                            "database": "TAB_AO.AO_CHANGE"
+                        },
+                        "currencyAgency": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.currency"
+                            },
+                            "database": "TAB_AO.AO_DEVISEAGENCE"
+                        },
+                        "exchangeRateAgency": {
+                            "type": "number",
+                            "database": "TAB_AO.AO_CHANGEAGENCE"
+                        }
+                    },
+                    "required": [
+                        "title"
+                    ],
+                    "additionalProperties": false
+                },
+                "relationships": {
+                    "type": "object",
+                    "properties": {
+                        "mainManager": {
+                            "description": "Opportunity's main manager",
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "pattern": "^[1-9][0-9]*$",
+                                            "database": "TAB_AO.ID_PROFIL"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "type"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "agency": {
+                            "description": "Opportunity's agency",
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "pattern": "^[1-9][0-9]*$",
+                                            "database": "TAB_AO.ID_SOCIETE"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "agency"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "type"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "pole": {
+                            "oneOf": [
+                                {
+                                    "description": "No relationships",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "description": "Opportunity's pole",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "pattern": "^[1-9][0-9]*$",
+                                                    "database": "TAB_AO.ID_POLE"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "pole"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "type"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            ]
+                        },
+                        "company": {
+                            "oneOf": [
+                                {
+                                    "description": "No relationships",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "description": "Opportunity's company. If defined then opportunity's contact have to be set.",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "pattern": "^[1-9][0-9]*$",
+                                                    "database": "TAB_AO.ID_CRMSOCIETE"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "company"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "type"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            ]
+                        },
+                        "contact": {
+                            "oneOf": [
+                                {
+                                    "description": "No relationships",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "description": "Opportunity's contact. If defined then opportunity's company have to be set.",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "pattern": "^[1-9][0-9]*$",
+                                                    "database": "TAB_AO.ID_CRMCONTACT"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "contact"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "type"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "type",
+                "attributes"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "additionalProperties": false,
+    "id": "schemas/opportunities/bodyPost.json"
+}

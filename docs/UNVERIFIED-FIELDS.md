@@ -106,6 +106,19 @@ since 0.11.0 (`CollectionSpec(..., periodes=("inProgress",))`) and keeps
 ignoring the three other shapes, as the vendor does. `times` still has no
 `updateDate`: a consumer can window by row date, not by modification date.
 
+## Writes — DOCUMENTED, never exercised on a real tenant
+
+The comparison script only issues GETs: the write routes (`POST /opportunities`,
+`POST /candidates`, `PUT …/{id}/information`) rest on the RAML alone.
+
+| Behaviour | Source | Status |
+|---|---|---|
+| routes, 200 with the profile, body schemas | RAML (`resourceTypes/search.raml`, `schemas/*/bodyPost.json`, `*/informationBodyPut.json`) | documented |
+| unknown attribute → 422 | the schemas' `additionalProperties: false` | documented, response never observed |
+| 422 `code` (`"422"`) and message of a schema violation | invented | **unverified** |
+| unknown related entity → 422 | invented, plausible | **unverified** |
+| `mainManager`/`agency` defaulting to the token user | invented, plausible | **unverified** |
+
 ## The RAML × observed matrix
 
 Fields DOCUMENTED in the RAML that the real API never returned (even with the

@@ -47,6 +47,10 @@ RUN groupadd --gid 65532 mock && \
 
 COPY --from=builder /opt/venv /opt/venv
 
+# Where BOOND_MOCK_DATA_FILE points when the state must survive a restart: owned
+# by the runtime user, so a named volume mounted here inherits a writable owner.
+RUN mkdir /data && chown 65532:65532 /data
+
 USER 65532:65532
 EXPOSE 8000
 

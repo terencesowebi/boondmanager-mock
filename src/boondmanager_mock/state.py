@@ -14,9 +14,11 @@ reparcourait toutes les collections (included).
 from __future__ import annotations
 
 import json
+import threading
 import time
 from typing import Any
 
+from . import persistance
 from .evolution import Evolution
 from .included import TYPE_VERS_CLE
 from .injection import engine
@@ -43,7 +45,50 @@ class MockState:
         self.evolution: Evolution = Evolution(self.seed, time.time())
         self._index: dict[tuple[str, str], dict[str, Any]] | None = None
         self._blobs: dict[str, list[str]] = {}
-        self.reset()
+        #: Sérialise les écritures et leur sauvegarde : les handlers FastAPI
+        #: tournent dans un pool de threads, et deux créations simultanées
+        #: calculeraient le même identifiant.
+        self.verrou = threading.RLock()
+        if not self._restaurer():
+            self.reset()
+
+    def _restaurer(self) -> bool:
+        """Reprend l'instantané du fichier d'état, s'il y en a un d'exploitable."""
+        if not settings.data_file:
+            return False
+        contenu = persistance.charger(settings.data_file)
+        if contenu is None:
+            return False
+        self.seed = contenu["seed"]
+        self.dataset = contenu["dataset"]
+        evolution = contenu["evolution"]
+        self.evolution = Evolution(self.seed, evolution["demarrage"])
+        self.evolution.appliques = evolution["appliques"]
+        self.evolution.journal = evolution["journal"]
+        self.fail_collections = set()
+        engine.clear()
+        engine.reset_counters()
+        self._index = None
+        self._blobs = {}
+        _apply_baseline_injections()
+        return True
+
+    def _persister(self) -> None:
+        if not settings.data_file:
+            return
+        with self.verrou:
+            persistance.sauvegarder(
+                settings.data_file,
+                {
+                    "seed": self.seed,
+                    "dataset": self.dataset,
+                    "evolution": {
+                        "demarrage": self.evolution.demarrage,
+                        "appliques": self.evolution.appliques,
+                        "journal": self.evolution.journal,
+                    },
+                },
+            )
 
     def reset(self, seed: int | None = None) -> None:
         """Reconstruit le jeu de données et remet les compteurs à zéro.
@@ -67,9 +112,14 @@ class MockState:
     # ── Caches dérivés du dataset ────────────────────────────────────────────
 
     def invalider_caches(self) -> None:
-        """À appeler après TOUTE mutation du dataset (admin, évolution)."""
+        """À appeler après TOUTE mutation du dataset (admin, évolution, écriture).
+
+        C'est aussi le point de sauvegarde : toute mutation passe par ici, donc
+        aucune ne peut échapper au fichier d'état.
+        """
         self._index = None
         self._blobs = {}
+        self._persister()
 
     def avancer_evolution(self, maintenant: float) -> None:
         """Fait avancer la vie de l'entreprise ; invalide les caches si elle a bougé."""
