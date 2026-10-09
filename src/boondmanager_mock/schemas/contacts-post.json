@@ -1,0 +1,424 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "description": "Contact's information data sent in the body with a POST method",
+    "type": "object",
+    "properties": {
+        "data": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "contact"
+                    ]
+                },
+                "attributes": {
+                    "type": "object",
+                    "properties": {
+                        "creationDate": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$",
+                            "database": "TAB_CRMCONTACT.CCON_DATE"
+                        },
+                        "civility": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.civility"
+                            },
+                            "database": "TAB_CRMCONTACT.CCON_CIVILITE"
+                        },
+                        "firstName": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_PRENOM"
+                        },
+                        "lastName": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_NOM"
+                        },
+                        "state": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.state.contact"
+                            },
+                            "database": "TAB_CRMCONTACT.CCON_TYPE"
+                        },
+                        "email1": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_EMAIL"
+                        },
+                        "email2": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_EMAIL2"
+                        },
+                        "email3": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_EMAIL3"
+                        },
+                        "phone1": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "database": "TAB_CRMCONTACT.CCON_TEL1"
+                        },
+                        "phone2": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "database": "TAB_CRMCONTACT.CCON_TEL2"
+                        },
+                        "fax": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "database": "TAB_CRMCONTACT.CCON_FAX"
+                        },
+                        "address": {
+                            "type": "string",
+                            "maxLength": 250,
+                            "database": "TAB_CRMCONTACT.CCON_ADR"
+                        },
+                        "postcode": {
+                            "type": "string",
+                            "maxLength": 10,
+                            "database": "TAB_CRMCONTACT.CCON_CP"
+                        },
+                        "town": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_VILLE"
+                        },
+                        "country": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/country"
+                            },
+                            "database": "TAB_CRMCONTACT.CCON_PAYS"
+                        },
+                        "subDivision": {
+                            "type": "string",
+                            "maxLength": 6,
+                            "database": "TAB_CRMCONTACT.CCON_SUBDIVISION"
+                        },
+                        "origin": {
+                            "type": "object",
+                            "properties": {
+                                "typeOf": {
+                                    "type": "integer",
+                                    "minimum": -1,
+                                    "links": {
+                                        "rel": "describedBy",
+                                        "href": "/api/application/dictionary/setting.origin"
+                                    },
+                                    "database": "TAB_CRMCONTACT.CCON_TYPESOURCE"
+                                },
+                                "detail": {
+                                    "type": "string",
+                                    "maxLength": 100,
+                                    "database": "TAB_CRMCONTACT.CCON_TYPESOURCE"
+                                }
+                            },
+                            "required": [
+                                "typeOf",
+                                "detail"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "activityAreas": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of activity area {id}",
+                                "type": "string",
+                                "links": {
+                                    "rel": "describedBy",
+                                    "href": "/api/application/dictionary/setting.activityArea"
+                                }
+                            },
+                            "database": "TAB_CRMCONTACT.CCON_APPLICATIONS"
+                        },
+                        "informationComments": {
+                            "type": "string",
+                            "maxLength": 250,
+                            "database": "TAB_CRMCONTACT.CCON_COMMENTAIRE"
+                        },
+                        "tools": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of tools {id}",
+                                "type": "string",
+                                "links": {
+                                    "rel": "describedBy",
+                                    "href": "/api/application/dictionary/setting.tool"
+                                }
+                            },
+                            "database": "TAB_CRMCONTACT.CCON_OUTILS"
+                        },
+                        "department": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_SERVICE"
+                        },
+                        "function": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "database": "TAB_CRMCONTACT.CCON_FONCTION"
+                        },
+                        "socialNetworks": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "network": {
+                                        "type": "string",
+                                        "enum": [
+                                            "facebook",
+                                            "viadeo",
+                                            "linkedin",
+                                            "x"
+                                        ],
+                                        "database": "TAB_WEBSOCIAL.WEBSOCIAL_NETWORK"
+                                    },
+                                    "url": {
+                                        "type": "string",
+                                        "maxLength": 250,
+                                        "database": "TAB_WEBSOCIAL.WEBSOCIAL_URL"
+                                    }
+                                },
+                                "required": [
+                                    "network",
+                                    "url"
+                                ],
+                                "additionalProperties": false
+                            },
+                            "uniqueItems": true,
+                            "minItems": 0,
+                            "maxItems": 4
+                        },
+                        "typesOf": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of types {id}",
+                                "type": "string",
+                                "links": {
+                                    "rel": "describedBy",
+                                    "href": "/api/application/dictionary/setting.typeOf.contact"
+                                }
+                            },
+                            "database": "TAB_CRMCONTACT.CCON_TYPES"
+                        }
+                    },
+                    "required": [
+                        "firstName",
+                        "lastName"
+                    ],
+                    "additionalProperties": false
+                },
+                "relationships": {
+                    "type": "object",
+                    "properties": {
+                        "mainManager": {
+                            "description": "Contact's main manager",
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "pattern": "^[1-9][0-9]*$",
+                                            "database": "TAB_CRMCONTACT.ID_PROFIL"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "type"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "agency": {
+                            "description": "Contact's agency",
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "pattern": "^[1-9][0-9]*$",
+                                            "database": "TAB_CRMCONTACT.ID_SOCIETE"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "agency"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "type"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "pole": {
+                            "oneOf": [
+                                {
+                                    "description": "No relationships",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "description": "Contact's pole",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "pattern": "^[1-9][0-9]*$",
+                                                    "database": "TAB_CRMCONTACT.ID_POLE"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "pole"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "type"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            ]
+                        },
+                        "influencers": {
+                            "description": "List of contact's influencers",
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "pattern": "^[1-9][0-9]*$",
+                                                "database": "TAB_INFLUENCER.ID_PROFIL"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "resource"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "id",
+                                            "type"
+                                        ],
+                                        "additionalProperties": false
+                                    },
+                                    "uniqueItems": true
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "company": {
+                            "description": "Contact's company",
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "pattern": "^[1-9][0-9]*$",
+                                            "database": "TAB_CRMCONTACT.ID_CRMSOCIETE"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "company"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "type"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "company"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "type",
+                "attributes",
+                "relationships"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "additionalProperties": false,
+    "id": "schemas/contacts/bodyPost.json"
+}

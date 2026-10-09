@@ -121,7 +121,7 @@ the group linkage lives**: `parentCompany` + `subsidiaries`, observed
 ² the `startMonth`/`endMonth` window is REQUIRED — 422 with business code 1017
 otherwise, as in production.
 
-## Writing opportunities and candidates
+## Writing opportunities, companies, contacts and candidates
 
 The vendor's write routes, as declared in the RAML:
 
@@ -129,8 +129,17 @@ The vendor's write routes, as declared in the RAML:
 |---|---|
 | `POST /api/opportunities` | creates an opportunity (`title` required) |
 | `PUT /api/opportunities/{id}/information` | updates its information tab |
+| `POST /api/companies` | creates a company (`name` required) |
+| `PUT /api/companies/{id}/information` | updates its information tab |
+| `POST /api/contacts` | creates a contact (`firstName`, `lastName` and the `company` relationship required) |
+| `PUT /api/contacts/{id}/information` | updates its information tab |
 | `POST /api/candidates` | creates a candidate (`firstName`, `lastName` required) |
 | `PUT /api/candidates/{id}/information` | updates its information tab |
+
+Two reads go with them: `GET /api/companies/{id}/contacts` lists the contacts
+whose `company` relationship points to the company (documented, not observed
+live), and `GET /api/companies?keywordsType=name&keywords=…` searches the name
+only, as the RAML describes, where the default searches every field.
 
 JSON:API bodies (`{"data": {"type", "attributes", "relationships"}}`; a `PUT`
 also carries `data.id`). Both answer **200 with the profile**, as the RAML

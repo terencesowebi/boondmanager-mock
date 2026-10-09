@@ -86,6 +86,20 @@ ECRITURES: tuple[SpecEcriture, ...] = (
         },
     ),
     SpecEcriture(
+        "companies",
+        "companies",
+        "company",
+        "companies-post.json",
+        "companies-information-put.json",
+    ),
+    SpecEcriture(
+        "contacts",
+        "contacts",
+        "contact",
+        "contacts-post.json",
+        "contacts-information-put.json",
+    ),
+    SpecEcriture(
         "candidates",
         "candidates",
         "candidate",

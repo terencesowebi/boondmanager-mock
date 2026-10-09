@@ -180,3 +180,74 @@ def test_une_collection_hors_perimetre_refuse_l_ecriture(client, monkeypatch) ->
     monkeypatch.setattr(settings, "forbidden_collections", frozenset({"opportunities"}))
 
     assert client.post("/api/opportunities", json=_opportunite(), headers=JWT).status_code == 403
+
+
+def _societe(nom: str) -> dict[str, Any]:
+    return {"data": {"type": "company", "attributes": {"name": nom}}}
+
+
+def _contact(societe_id: str, **attributs: Any) -> dict[str, Any]:
+    return {
+        "data": {
+            "type": "contact",
+            "attributes": {"firstName": "Léa", "lastName": "Martin", **attributs},
+            "relationships": {"company": {"data": {"id": societe_id, "type": "company"}}},
+        }
+    }
+
+
+def test_creer_une_societe_puis_un_de_ses_contacts(client) -> None:
+    societe = client.post("/api/companies", json=_societe("Boréal Conseil"), headers=JWT)
+    assert societe.status_code == 200
+    societe_id = societe.json()["data"]["id"]
+
+    contact = client.post(
+        "/api/contacts", json=_contact(societe_id, email1="lea@boreal.fr"), headers=JWT
+    )
+
+    assert contact.status_code == 200
+    cree = contact.json()["data"]
+    assert cree["attributes"]["email1"] == "lea@boreal.fr"
+    assert cree["relationships"]["company"]["data"] == {"id": societe_id, "type": "company"}
+    contacts = client.get(f"/api/companies/{societe_id}/contacts", headers=JWT).json()
+    assert [c["id"] for c in contacts["data"]] == [cree["id"]]
+    assert contacts["meta"]["totals"]["rows"] == 1
+
+
+def test_un_contact_exige_sa_societe(client) -> None:
+    corps = _contact("1")
+    del corps["data"]["relationships"]
+
+    assert client.post("/api/contacts", json=corps, headers=JWT).status_code == 422
+
+
+def test_un_contact_d_une_societe_inconnue_donne_422(client) -> None:
+    assert client.post("/api/contacts", json=_contact("999999"), headers=JWT).status_code == 422
+
+
+def test_une_societe_exige_son_nom(client) -> None:
+    corps = {"data": {"type": "company", "attributes": {}}}
+
+    assert client.post("/api/companies", json=corps, headers=JWT).status_code == 422
+
+
+def test_les_contacts_d_une_societe_inconnue_donnent_404(client) -> None:
+    assert client.get("/api/companies/999999/contacts", headers=JWT).status_code == 404
+
+
+def test_rechercher_une_societe_par_son_nom_seulement(client) -> None:
+    client.post("/api/companies", json=_societe("Nébuleuse Ingénierie"), headers=JWT)
+
+    par_nom = client.get("/api/companies?keywordsType=name&keywords=nébuleuse", headers=JWT).json()[
+        "data"
+    ]
+
+    assert [s["attributes"]["name"] for s in par_nom] == ["Nébuleuse Ingénierie"]
+
+
+def test_retrouver_une_opportunite_par_sa_reference(client) -> None:
+    client.post("/api/opportunities", json=_opportunite(reference="malt::ao-4242"), headers=JWT)
+
+    trouvees = client.get("/api/opportunities?keywords=malt::ao-4242", headers=JWT).json()["data"]
+
+    assert [o["attributes"]["reference"] for o in trouvees] == ["malt::ao-4242"]

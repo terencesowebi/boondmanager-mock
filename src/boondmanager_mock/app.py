@@ -277,7 +277,7 @@ def _collection_items(dataset_key: str) -> list[dict[str, Any]]:
 #  Application
 # ─────────────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="BoondManager mock", version="0.12.0", docs_url="/docs")
+app = FastAPI(title="BoondManager mock", version="0.13.0", docs_url="/docs")
 api = APIRouter(prefix="/api")
 
 
@@ -334,6 +334,14 @@ def _garde_apres_auth(
     return _parametres_manquants(spec, params)
 
 
+def _societes_nommees(items: list[dict[str, Any]], keywords: str) -> list[dict[str, Any]]:
+    """`keywordsType=name` — la recherche ne porte que sur le nom de la société
+    (`resources/companies/search.raml`), là où `default` couvre aussi ville,
+    pays, domaine et informations."""
+    cherche = keywords.strip().lower()
+    return [i for i in items if cherche in str(i["attributes"].get("name", "")).lower()]
+
+
 def _paginated(request: Request, spec: CollectionSpec) -> JSONResponse:
     path_name, dataset_key = spec.chemin, spec.cle_dataset
     params = dict(request.query_params)
@@ -351,7 +359,10 @@ def _paginated(request: Request, spec: CollectionSpec) -> JSONResponse:
         # La fenêtre de termes est OBLIGATOIRE et effective (format AAAA-MM).
         debut, fin = params["startMonth"], params["endMonth"]
         items = [i for i in items if debut <= i["attributes"].get("term", "") <= fin]
-    items = apply_keywords(items, params.get("keywords", ""), state.blobs(dataset_key))
+    if spec.chemin == "companies" and params.get("keywordsType") == "name":
+        items = _societes_nommees(items, params.get("keywords", ""))
+    else:
+        items = apply_keywords(items, params.get("keywords", ""), state.blobs(dataset_key))
     # Une valeur de `period` absente de `spec.periodes` est acceptée et
     # IGNORÉE, comme le fournisseur le fait. Ne PAS transformer ça en 422 :
     # l'API réelle ne rejette rien, elle rend simplement tout, et un
@@ -759,6 +770,36 @@ _CODES_POSTAUX = {
 
 def _ref_societe(societe_id: str | None) -> dict[str, str] | None:
     return {"id": societe_id, "type": "company"} if societe_id else None
+
+
+@api.get(
+    "/companies/{item_id}/contacts",
+    response_model=ListEnvelope[Contact],
+    responses=REPONSES_ERREUR,
+    summary="Contacts tab — the contacts of a company",
+)
+def company_contacts(request: Request, item_id: str) -> JSONResponse:
+    """`GET /companies/{id}/contacts` — DOCUMENTED (`schemas/companies/contacts.json`),
+    not observed live: the contacts whose `company` relationship points to the
+    company, in the envelope of a list."""
+    if (
+        injected := _dispatch_injections("/api/companies/contacts", dict(request.query_params))
+    ) is not None:
+        return injected
+    if (denied := _check_auth(request)) is not None:
+        return denied
+    if not any(s["id"] == item_id for s in _collection_items("companies")):
+        return error(404, request=request)
+    contacts = [
+        c
+        for c in _collection_items("contacts")
+        if ((c.get("relationships") or {}).get("company") or {}).get("data", {})
+        == {
+            "id": item_id,
+            "type": "company",
+        }
+    ]
+    return JSONResponse(envelope(contacts, len(contacts)))
 
 
 @api.get(

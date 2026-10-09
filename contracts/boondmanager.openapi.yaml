@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: BoondManager mock
-  version: 0.12.0
+  version: 0.13.0
 paths:
   /health:
     get:
@@ -1109,6 +1109,597 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+    post:
+      summary: 'Create: company'
+      operationId: create_companies_api_companies_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - company
+                    attributes:
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_CRMSOCIETE.CSOC_DATE
+                        name:
+                          type: string
+                          maxLength: 100
+                          minLength: 1
+                          database: TAB_CRMSOCIETE.CSOC_SOCIETE
+                        state:
+                          type: integer
+                          minimum: 0.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.company
+                          database: TAB_CRMSOCIETE.CSOC_TYPE
+                        website:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_WEB
+                        phone1:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMSOCIETE.CSOC_TEL
+                        fax:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMSOCIETE.CSOC_FAX
+                        address:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMSOCIETE.CSOC_ADR
+                        postcode:
+                          type: string
+                          maxLength: 10
+                          database: TAB_CRMSOCIETE.CSOC_CP
+                        town:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_VILLE
+                        country:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/country
+                          database: TAB_CRMSOCIETE.CSOC_PAYS
+                        subDivision:
+                          type: string
+                          maxLength: 6
+                          database: TAB_CRMSOCIETE.CSOC_SUBDIVISION
+                        number:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMSOCIETE.CSOC_NUMERO
+                        origin:
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1.0
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.origin
+                              database: TAB_CRMSOCIETE.CSOC_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_CRMSOCIETE.CSOC_SOURCE
+                              defaultValue: ''
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - typeOf
+                        staff:
+                          type: integer
+                          minimum: 0.0
+                          database: TAB_CRMSOCIETE.CSOC_EFFECTIF
+                        expertiseArea:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.expertiseArea
+                          database: TAB_CRMSOCIETE.CSOC_INTERVENTION
+                        informationComments:
+                          type: string
+                          maxLength: 1000
+                          database: TAB_CRMSOCIETE.CSOC_METIERS
+                        departments:
+                          items:
+                            type: string
+                          type: array
+                          database: TAB_CRMSOCIETE.CSOC_SERVICES
+                        vatNumber:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_TVA
+                        registrationNumber:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_SIREN TAB_CRMSOCIETE.CSOC_NIC
+                        legalStatus:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_STATUT
+                        registeredOffice:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_RCS
+                        apeCode:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_NAF
+                        billingDetails:
+                          items:
+                            oneOf:
+                            - properties:
+                                name:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_NOM
+                                contact:
+                                  type: string
+                                  maxLength: 200
+                                  database: TAB_COORDONNEES.COORD_CONTACT
+                                phone1:
+                                  type: string
+                                  maxLength: 20
+                                  database: TAB_COORDONNEES.COORD_TEL
+                                emails:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_EMAILS
+                                cc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_CC
+                                bcc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_BCC
+                                reminderEmails:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_EMAILS_REMINDER
+                                reminderCc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_CC_REMINDER
+                                reminderBcc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_BCC_REMINDER
+                                address1:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR1
+                                address2:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR2
+                                address3:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR3
+                                postcode:
+                                  type: string
+                                  maxLength: 10
+                                  database: TAB_COORDONNEES.COORD_CP
+                                town:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VILLE
+                                country:
+                                  type: string
+                                  maxLength: 100
+                                  links:
+                                    rel: describedBy
+                                    href: /api/application/dictionary/country
+                                  database: TAB_COORDONNEES.COORD_PAYS
+                                subDivision:
+                                  type: string
+                                  maxLength: 6
+                                  database: TAB_COORDONNEES.COORD_SUBDIVISION
+                                vatNumber:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VAT_NUMBER
+                                registrationNumber:
+                                  type: string
+                                  maxLength: 100
+                                number:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_NUMBER
+                                sendingMode:
+                                  type: number
+                                  minimum: -1.0
+                                  database: TAB_COORDONNEES.COORD_SENDING_MODE
+                                sendingModeParams:
+                                  oneOf:
+                                  - type: object
+                                    description: 'JSON Object representing params
+                                      depending on sendingMode. For example, for sendingMode
+                                      code ''choruspro'' : { value: ''SERVICE_CODE_VAlUE''
+                                      }'
+                                    database: TAB_COORDONNEES.COORD_SENDING_MODE_PARAMS
+                                  - type: 'null'
+                                invalid:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_INVALID
+                                invalidType:
+                                  type: integer
+                                  minimum: 0.0
+                                  database: TAB_COORDONNEES.COORD_INVALID_TYPE
+                                state:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_ETAT
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - name
+                              - contact
+                              - emails
+                              - phone1
+                              - postcode
+                              - town
+                              - country
+                              - cc
+                              - bcc
+                              - reminderEmails
+                              - reminderCc
+                              - reminderBcc
+                              - address1
+                              - address2
+                              - address3
+                              - vatNumber
+                              - registrationNumber
+                              - number
+                              - sendingMode
+                              - sendingModeParams
+                              - state
+                              description: Create a detail
+                            - properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_COORDONNEES.ID_COORDONNEES
+                                name:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_NOM
+                                contact:
+                                  type: string
+                                  maxLength: 200
+                                  database: TAB_COORDONNEES.COORD_CONTACT
+                                phone1:
+                                  type: string
+                                  maxLength: 20
+                                  database: TAB_COORDONNEES.COORD_TEL
+                                emails:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_EMAILS
+                                cc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_CC
+                                bcc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_BCC
+                                address1:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR1
+                                address2:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR2
+                                address3:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR3
+                                postcode:
+                                  type: string
+                                  maxLength: 10
+                                  database: TAB_COORDONNEES.COORD_CP
+                                town:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VILLE
+                                country:
+                                  type: string
+                                  maxLength: 100
+                                  links:
+                                    rel: describedBy
+                                    href: /api/application/dictionary/country
+                                  database: TAB_COORDONNEES.COORD_PAYS
+                                subDivision:
+                                  type: string
+                                  maxLength: 6
+                                  database: TAB_COORDONNEES.COORD_SUBDIVISION
+                                vatNumber:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VAT_NUMBER
+                                registrationNumber:
+                                  type: string
+                                  maxLength: 100
+                                number:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_NUMBER
+                                sendingMode:
+                                  type: number
+                                  minimum: -1.0
+                                  database: TAB_COORDONNEES.COORD_SENDING_MODE
+                                sendingModeParams:
+                                  oneOf:
+                                  - type: object
+                                    description: 'JSON Object representing params
+                                      depending on sendingMode. For example, for sendingMode
+                                      code ''choruspro'' : { value: ''SERVICE_CODE_VAlUE''
+                                      }'
+                                    database: TAB_COORDONNEES.COORD_SENDING_MODE_PARAMS
+                                  - type: 'null'
+                                invalid:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_INVALID
+                                invalidType:
+                                  type: integer
+                                  minimum: 0.0
+                                  database: TAB_COORDONNEES.COORD_INVALID_TYPE
+                                state:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_ETAT
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - name
+                              - contact
+                              - emails
+                              - cc
+                              - bcc
+                              - phone1
+                              - postcode
+                              - town
+                              - country
+                              - address1
+                              - address2
+                              - address3
+                              - vatNumber
+                              - registrationNumber
+                              - number
+                              - sendingMode
+                              - sendingModeParams
+                              - state
+                              description: Update a detail
+                          type: array
+                          description: List of details
+                        socialNetworks:
+                          items:
+                            properties:
+                              network:
+                                type: string
+                                enum:
+                                - facebook
+                                - viadeo
+                                - linkedin
+                                - x
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_NETWORK
+                              url:
+                                type: string
+                                maxLength: 250
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_URL
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - network
+                            - url
+                          type: array
+                          maxItems: 4
+                          minItems: 0
+                          uniqueItems: true
+                      additionalProperties: false
+                      type: object
+                      required:
+                      - name
+                    relationships:
+                      properties:
+                        mainManager:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMSOCIETE.ID_PROFIL
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Company's main manager
+                        agency:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMSOCIETE.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Company's agency
+                        pole:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_CRMSOCIETE.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Company's pole
+                        influencers:
+                          properties:
+                            data:
+                              items:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_INFLUENCER.ID_PROFIL
+                                  type:
+                                    type: string
+                                    enum:
+                                    - resource
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                              type: array
+                              uniqueItems: true
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: List of company's influencers
+                        parentCompany:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_CRMSOCIETE.ID_CRMSOCIETE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - company
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Company's parent
+                      additionalProperties: false
+                      type: object
+                  additionalProperties: false
+                  type: object
+                  required:
+                  - type
+                  - attributes
+              additionalProperties: false
+              type: object
+              required:
+              - data
+              description: Company's information data sent in the body with a POST
+                method
+              id: schemas/companies/bodyPost.json
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Societe_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
   /api/companies/{item_id}:
     get:
       summary: 'Profile: company'
@@ -1177,6 +1768,371 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListEnvelope_Contact_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    post:
+      summary: 'Create: contact'
+      operationId: create_contacts_api_contacts_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - contact
+                    attributes:
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_CRMCONTACT.CCON_DATE
+                        civility:
+                          type: integer
+                          minimum: 0.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.civility
+                          database: TAB_CRMCONTACT.CCON_CIVILITE
+                        firstName:
+                          type: string
+                          maxLength: 100
+                          minLength: 1
+                          database: TAB_CRMCONTACT.CCON_PRENOM
+                        lastName:
+                          type: string
+                          maxLength: 100
+                          minLength: 1
+                          database: TAB_CRMCONTACT.CCON_NOM
+                        state:
+                          type: integer
+                          minimum: 0.0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.contact
+                          database: TAB_CRMCONTACT.CCON_TYPE
+                        email1:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_EMAIL
+                        email2:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_EMAIL2
+                        email3:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_EMAIL3
+                        phone1:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMCONTACT.CCON_TEL1
+                        phone2:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMCONTACT.CCON_TEL2
+                        fax:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMCONTACT.CCON_FAX
+                        address:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMCONTACT.CCON_ADR
+                        postcode:
+                          type: string
+                          maxLength: 10
+                          database: TAB_CRMCONTACT.CCON_CP
+                        town:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_VILLE
+                        country:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/country
+                          database: TAB_CRMCONTACT.CCON_PAYS
+                        subDivision:
+                          type: string
+                          maxLength: 6
+                          database: TAB_CRMCONTACT.CCON_SUBDIVISION
+                        origin:
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1.0
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.origin
+                              database: TAB_CRMCONTACT.CCON_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_CRMCONTACT.CCON_TYPESOURCE
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - typeOf
+                          - detail
+                        activityAreas:
+                          items:
+                            type: string
+                            description: List of activity area {id}
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.activityArea
+                          type: array
+                          database: TAB_CRMCONTACT.CCON_APPLICATIONS
+                        informationComments:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMCONTACT.CCON_COMMENTAIRE
+                        tools:
+                          items:
+                            type: string
+                            description: List of tools {id}
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.tool
+                          type: array
+                          database: TAB_CRMCONTACT.CCON_OUTILS
+                        department:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_SERVICE
+                        function:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_FONCTION
+                        socialNetworks:
+                          items:
+                            properties:
+                              network:
+                                type: string
+                                enum:
+                                - facebook
+                                - viadeo
+                                - linkedin
+                                - x
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_NETWORK
+                              url:
+                                type: string
+                                maxLength: 250
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_URL
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - network
+                            - url
+                          type: array
+                          maxItems: 4
+                          minItems: 0
+                          uniqueItems: true
+                        typesOf:
+                          items:
+                            type: string
+                            description: List of types {id}
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.typeOf.contact
+                          type: array
+                          database: TAB_CRMCONTACT.CCON_TYPES
+                      additionalProperties: false
+                      type: object
+                      required:
+                      - firstName
+                      - lastName
+                    relationships:
+                      properties:
+                        mainManager:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMCONTACT.ID_PROFIL
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Contact's main manager
+                        agency:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMCONTACT.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Contact's agency
+                        pole:
+                          oneOf:
+                          - properties:
+                              data:
+                                type: 'null'
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: No relationships
+                          - properties:
+                              data:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_CRMCONTACT.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                            additionalProperties: false
+                            type: object
+                            required:
+                            - data
+                            description: Contact's pole
+                        influencers:
+                          properties:
+                            data:
+                              items:
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_INFLUENCER.ID_PROFIL
+                                  type:
+                                    type: string
+                                    enum:
+                                    - resource
+                                additionalProperties: false
+                                type: object
+                                required:
+                                - id
+                                - type
+                              type: array
+                              uniqueItems: true
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: List of contact's influencers
+                        company:
+                          properties:
+                            data:
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMCONTACT.ID_CRMSOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - company
+                              additionalProperties: false
+                              type: object
+                              required:
+                              - id
+                              - type
+                          additionalProperties: false
+                          type: object
+                          required:
+                          - data
+                          description: Contact's company
+                      additionalProperties: false
+                      type: object
+                      required:
+                      - company
+                  additionalProperties: false
+                  type: object
+                  required:
+                  - type
+                  - attributes
+                  - relationships
+              additionalProperties: false
+              type: object
+              required:
+              - data
+              description: Contact's information data sent in the body with a POST
+                method
+              id: schemas/contacts/bodyPost.json
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Contact_'
         '401':
           description: No credentials provided.
           content:
@@ -3349,6 +4305,1056 @@ paths:
               - data
               additionalProperties: false
               id: schemas/opportunities/informationBodyPut.json
+  /api/companies/{item_id}/information:
+    put:
+      summary: 'Update information: company'
+      operationId: update_companies_information_api_companies__item_id__information_put
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Societe_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: Company's information data sent in the body with a PUT
+                method
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      pattern: ^[1-9][0-9]*$
+                      database: TAB_CRMSOCIETE.ID_CRMSOCIETE
+                    type:
+                      type: string
+                      enum:
+                      - company
+                    attributes:
+                      type: object
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_CRMSOCIETE.CSOC_DATE
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_SOCIETE
+                        state:
+                          type: integer
+                          minimum: 0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.company
+                          database: TAB_CRMSOCIETE.CSOC_TYPE
+                        website:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_WEB
+                        phone1:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMSOCIETE.CSOC_TEL
+                        fax:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMSOCIETE.CSOC_FAX
+                        address:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMSOCIETE.CSOC_ADR
+                        postcode:
+                          type: string
+                          maxLength: 10
+                          database: TAB_CRMSOCIETE.CSOC_CP
+                        town:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_VILLE
+                        country:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/country
+                          database: TAB_CRMSOCIETE.CSOC_PAYS
+                        subDivision:
+                          type: string
+                          maxLength: 6
+                          database: TAB_CRMSOCIETE.CSOC_SUBDIVISION
+                        number:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMSOCIETE.CSOC_NUMERO
+                        origin:
+                          type: object
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.origin
+                              database: TAB_CRMSOCIETE.CSOC_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_CRMSOCIETE.CSOC_SOURCE
+                              defaultValue: ''
+                          required:
+                          - typeOf
+                          additionalProperties: false
+                        staff:
+                          type: integer
+                          minimum: 0
+                          database: TAB_CRMSOCIETE.CSOC_EFFECTIF
+                        expertiseArea:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.expertiseArea
+                          database: TAB_CRMSOCIETE.CSOC_INTERVENTION
+                        informationComments:
+                          type: string
+                          maxLength: 1000
+                          database: TAB_CRMSOCIETE.CSOC_METIERS
+                        departments:
+                          type: array
+                          items:
+                            type: string
+                          database: TAB_CRMSOCIETE.CSOC_SERVICES
+                        vatNumber:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_TVA
+                        registrationNumber:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_SIREN TAB_CRMSOCIETE.CSOC_NIC
+                        legalStatus:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_STATUT
+                        registeredOffice:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_RCS
+                        apeCode:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMSOCIETE.CSOC_NAF
+                        billingDetails:
+                          description: List of details
+                          type: array
+                          items:
+                            oneOf:
+                            - description: Create a detail
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_NOM
+                                contact:
+                                  type: string
+                                  maxLength: 200
+                                  database: TAB_COORDONNEES.COORD_CONTACT
+                                phone1:
+                                  type: string
+                                  maxLength: 20
+                                  database: TAB_COORDONNEES.COORD_TEL
+                                emails:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_EMAILS
+                                cc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_CC
+                                bcc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_BCC
+                                reminderEmails:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_EMAILS_REMINDER
+                                reminderCc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_CC_REMINDER
+                                reminderBcc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_BCC_REMINDER
+                                address1:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR1
+                                address2:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR2
+                                address3:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR3
+                                postcode:
+                                  type: string
+                                  maxLength: 10
+                                  database: TAB_COORDONNEES.COORD_CP
+                                town:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VILLE
+                                country:
+                                  type: string
+                                  maxLength: 100
+                                  links:
+                                    rel: describedBy
+                                    href: /api/application/dictionary/country
+                                  database: TAB_COORDONNEES.COORD_PAYS
+                                subDivision:
+                                  type: string
+                                  maxLength: 6
+                                  database: TAB_COORDONNEES.COORD_SUBDIVISION
+                                vatNumber:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VAT_NUMBER
+                                registrationNumber:
+                                  type: string
+                                  maxLength: 100
+                                number:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_NUMBER
+                                sendingMode:
+                                  type: number
+                                  minimum: -1
+                                  database: TAB_COORDONNEES.COORD_SENDING_MODE
+                                sendingModeParams:
+                                  oneOf:
+                                  - type: object
+                                    description: 'JSON Object representing params
+                                      depending on sendingMode. For example, for sendingMode
+                                      code ''choruspro'' : { value: ''SERVICE_CODE_VAlUE''
+                                      }'
+                                    database: TAB_COORDONNEES.COORD_SENDING_MODE_PARAMS
+                                  - type: 'null'
+                                invalid:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_INVALID
+                                invalidType:
+                                  type: integer
+                                  minimum: 0
+                                  database: TAB_COORDONNEES.COORD_INVALID_TYPE
+                                state:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_ETAT
+                              required:
+                              - name
+                              - contact
+                              - emails
+                              - phone1
+                              - postcode
+                              - town
+                              - country
+                              - cc
+                              - bcc
+                              - reminderEmails
+                              - reminderCc
+                              - reminderBcc
+                              - address1
+                              - address2
+                              - address3
+                              - vatNumber
+                              - registrationNumber
+                              - number
+                              - sendingMode
+                              - sendingModeParams
+                              - state
+                              additionalProperties: false
+                            - description: Update a detail
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_COORDONNEES.ID_COORDONNEES
+                                name:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_NOM
+                                contact:
+                                  type: string
+                                  maxLength: 200
+                                  database: TAB_COORDONNEES.COORD_CONTACT
+                                phone1:
+                                  type: string
+                                  maxLength: 20
+                                  database: TAB_COORDONNEES.COORD_TEL
+                                emails:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_EMAILS
+                                cc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_CC
+                                bcc:
+                                  type: array
+                                  database: TAB_COORDONNEES.COORD_BCC
+                                address1:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR1
+                                address2:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR2
+                                address3:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_ADR3
+                                postcode:
+                                  type: string
+                                  maxLength: 10
+                                  database: TAB_COORDONNEES.COORD_CP
+                                town:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VILLE
+                                country:
+                                  type: string
+                                  maxLength: 100
+                                  links:
+                                    rel: describedBy
+                                    href: /api/application/dictionary/country
+                                  database: TAB_COORDONNEES.COORD_PAYS
+                                subDivision:
+                                  type: string
+                                  maxLength: 6
+                                  database: TAB_COORDONNEES.COORD_SUBDIVISION
+                                vatNumber:
+                                  type: string
+                                  maxLength: 100
+                                  database: TAB_COORDONNEES.COORD_VAT_NUMBER
+                                registrationNumber:
+                                  type: string
+                                  maxLength: 100
+                                number:
+                                  type: string
+                                  maxLength: 250
+                                  database: TAB_COORDONNEES.COORD_NUMBER
+                                sendingMode:
+                                  type: number
+                                  minimum: -1
+                                  database: TAB_COORDONNEES.COORD_SENDING_MODE
+                                sendingModeParams:
+                                  oneOf:
+                                  - type: object
+                                    description: 'JSON Object representing params
+                                      depending on sendingMode. For example, for sendingMode
+                                      code ''choruspro'' : { value: ''SERVICE_CODE_VAlUE''
+                                      }'
+                                    database: TAB_COORDONNEES.COORD_SENDING_MODE_PARAMS
+                                  - type: 'null'
+                                invalid:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_INVALID
+                                invalidType:
+                                  type: integer
+                                  minimum: 0
+                                  database: TAB_COORDONNEES.COORD_INVALID_TYPE
+                                state:
+                                  type: boolean
+                                  database: TAB_COORDONNEES.COORD_ETAT
+                              required:
+                              - id
+                              - name
+                              - contact
+                              - emails
+                              - cc
+                              - bcc
+                              - phone1
+                              - postcode
+                              - town
+                              - country
+                              - address1
+                              - address2
+                              - address3
+                              - vatNumber
+                              - registrationNumber
+                              - number
+                              - sendingMode
+                              - sendingModeParams
+                              - state
+                              additionalProperties: false
+                        socialNetworks:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              network:
+                                type: string
+                                enum:
+                                - facebook
+                                - viadeo
+                                - linkedin
+                                - x
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_NETWORK
+                              url:
+                                type: string
+                                maxLength: 250
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_URL
+                            required:
+                            - network
+                            - url
+                            additionalProperties: false
+                          uniqueItems: true
+                          minItems: 0
+                          maxItems: 4
+                      additionalProperties: false
+                    relationships:
+                      type: object
+                      properties:
+                        mainManager:
+                          description: Company's main manager
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMSOCIETE.ID_PROFIL
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        agency:
+                          description: Company's agency
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMSOCIETE.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        pole:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Company's pole
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_CRMSOCIETE.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                        influencers:
+                          description: List of company's influencers
+                          type: object
+                          properties:
+                            data:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_INFLUENCER.ID_PROFIL
+                                  type:
+                                    type: string
+                                    enum:
+                                    - resource
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                              uniqueItems: true
+                          required:
+                          - data
+                          additionalProperties: false
+                        parentCompany:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Company's parent
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_CRMSOCIETE.ID_CRMSOCIETE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - company
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                      additionalProperties: false
+                  required:
+                  - id
+                  - type
+                  additionalProperties: false
+              required:
+              - data
+              additionalProperties: false
+              id: schemas/companies/informationBodyPut.json
+    get:
+      summary: Information tab — THE only place the company group lives
+      description: "`GET /companies/{id}/information` — OBSERVED live 2026-09-13.\n\
+        \nRead-only probe on a production tenant, field NAMES only (no values):\n\n\
+        * **the group lives here and nowhere else** — `GET /companies` and\n  `GET\
+        \ /companies/{id}` only carry `agency`, `mainManager`, `pole`. This\n  tab\
+        \ adds `createdBy`, `files`, `influencers`, `parentCompany` and\n  `subsidiaries`\
+        \ (eight relationships in all).\n* **`parentCompany`** is `data: null` or\
+        \ `{id, type: \"company\"}` — set on\n  about 6 of 20 sampled companies.\n\
+        * **`subsidiaries`** is a LIST of `{id, type: \"company\"}`, empty when the\n\
+        \  company has none. Both directions are CONSISTENT: one group listed 16\n\
+        \  subsidiaries, each pointing back to it. The mock derives `subsidiaries`\n\
+        \  from `parentCompany` so the property holds by construction.\n* **27 attributes**;\
+        \ `included` carries types `agency`, `company`,\n  `resource`. Attribute types\
+        \ beyond those of the search are NOT observed\n  (`x-boond-confidence: unverified`)."
+      operationId: company_information_api_companies__item_id__information_get
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_InformationSociete_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /api/contacts/{item_id}/information:
+    put:
+      summary: 'Update information: contact'
+      operationId: update_contacts_information_api_contacts__item_id__information_put
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEnvelope_Contact_'
+        '401':
+          description: No credentials provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Unknown entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Token present but invalid, missing required parameter (business
+            code 1017), or unreadable pagination parameter. **422, not 401** — that
+            is what the real API does, and the status code is what retry logic keys
+            on.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limit reached. `Retry-After` header in seconds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Injected failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: Injected transient failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: Contact's information data sent in the body with a PUT
+                method
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      pattern: ^[1-9][0-9]*$
+                      database: TAB_CRMCONTACT.ID_CRMCONTACT
+                    type:
+                      type: string
+                      enum:
+                      - contact
+                    attributes:
+                      type: object
+                      properties:
+                        creationDate:
+                          type: string
+                          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$
+                          database: TAB_CRMCONTACT.CCON_DATE
+                        civility:
+                          type: integer
+                          minimum: 0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.civility
+                          database: TAB_CRMCONTACT.CCON_CIVILITE
+                        firstName:
+                          type: string
+                          minLength: 1
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_PRENOM
+                        lastName:
+                          type: string
+                          minLength: 1
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_NOM
+                        state:
+                          type: integer
+                          minimum: 0
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/setting.state.contact
+                          database: TAB_CRMCONTACT.CCON_TYPE
+                        email1:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_EMAIL
+                        email2:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_EMAIL2
+                        email3:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_EMAIL3
+                        phone1:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMCONTACT.CCON_TEL1
+                        phone2:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMCONTACT.CCON_TEL2
+                        fax:
+                          type: string
+                          maxLength: 20
+                          database: TAB_CRMCONTACT.CCON_FAX
+                        address:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMCONTACT.CCON_ADR
+                        postcode:
+                          type: string
+                          maxLength: 10
+                          database: TAB_CRMCONTACT.CCON_CP
+                        town:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_VILLE
+                        country:
+                          type: string
+                          maxLength: 100
+                          links:
+                            rel: describedBy
+                            href: /api/application/dictionary/country
+                          database: TAB_CRMCONTACT.CCON_PAYS
+                        subDivision:
+                          type: string
+                          maxLength: 6
+                          database: TAB_CRMCONTACT.CCON_SUBDIVISION
+                        origin:
+                          type: object
+                          properties:
+                            typeOf:
+                              type: integer
+                              minimum: -1
+                              links:
+                                rel: describedBy
+                                href: /api/application/dictionary/setting.origin
+                              database: TAB_CRMCONTACT.CCON_TYPESOURCE
+                            detail:
+                              type: string
+                              maxLength: 100
+                              database: TAB_CRMCONTACT.CCON_TYPESOURCE
+                          required:
+                          - typeOf
+                          - detail
+                          additionalProperties: false
+                        activityAreas:
+                          type: array
+                          items:
+                            description: List of activity area {id}
+                            type: string
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.activityArea
+                          database: TAB_CRMCONTACT.CCON_APPLICATIONS
+                        informationComments:
+                          type: string
+                          maxLength: 250
+                          database: TAB_CRMCONTACT.CCON_COMMENTAIRE
+                        tools:
+                          type: array
+                          items:
+                            description: List of tools {id}
+                            type: string
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.tool
+                          database: TAB_CRMCONTACT.CCON_OUTILS
+                        department:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_SERVICE
+                        function:
+                          type: string
+                          maxLength: 100
+                          database: TAB_CRMCONTACT.CCON_FONCTION
+                        socialNetworks:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              network:
+                                type: string
+                                enum:
+                                - facebook
+                                - viadeo
+                                - linkedin
+                                - x
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_NETWORK
+                              url:
+                                type: string
+                                maxLength: 250
+                                database: TAB_WEBSOCIAL.WEBSOCIAL_URL
+                            required:
+                            - network
+                            - url
+                            additionalProperties: false
+                          uniqueItems: true
+                          minItems: 0
+                          maxItems: 4
+                        typesOf:
+                          type: array
+                          items:
+                            description: List of types {id}
+                            type: string
+                            links:
+                              rel: describedBy
+                              href: /api/application/dictionary/setting.typeOf.contact
+                          database: TAB_CRMCONTACT.CCON_TYPES
+                      additionalProperties: false
+                    relationships:
+                      type: object
+                      properties:
+                        mainManager:
+                          description: Contact's main manager
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMCONTACT.ID_PROFIL
+                                type:
+                                  type: string
+                                  enum:
+                                  - resource
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        agency:
+                          description: Contact's agency
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^[1-9][0-9]*$
+                                  database: TAB_CRMCONTACT.ID_SOCIETE
+                                type:
+                                  type: string
+                                  enum:
+                                  - agency
+                              required:
+                              - id
+                              - type
+                              additionalProperties: false
+                          required:
+                          - data
+                          additionalProperties: false
+                        pole:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Contact's pole
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_CRMCONTACT.ID_POLE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - pole
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                        influencers:
+                          description: List of contact's influencers
+                          type: object
+                          properties:
+                            data:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_INFLUENCER.ID_PROFIL
+                                  type:
+                                    type: string
+                                    enum:
+                                    - resource
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                              uniqueItems: true
+                          required:
+                          - data
+                          additionalProperties: false
+                        company:
+                          oneOf:
+                          - description: No relationships
+                            type: object
+                            properties:
+                              data:
+                                type: 'null'
+                            required:
+                            - data
+                            additionalProperties: false
+                          - description: Contact's company
+                            type: object
+                            properties:
+                              data:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    pattern: ^[1-9][0-9]*$
+                                    database: TAB_CRMCONTACT.ID_CRMSOCIETE
+                                  type:
+                                    type: string
+                                    enum:
+                                    - company
+                                required:
+                                - id
+                                - type
+                                additionalProperties: false
+                            required:
+                            - data
+                            additionalProperties: false
+                      additionalProperties: false
+                  required:
+                  - id
+                  - type
+                  additionalProperties: false
+              required:
+              - data
+              additionalProperties: false
+              id: schemas/contacts/informationBodyPut.json
   /api/candidates/{item_id}/information:
     put:
       summary: 'Update information: candidate'
@@ -3895,23 +5901,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-  /api/companies/{item_id}/information:
+  /api/companies/{item_id}/contacts:
     get:
-      summary: Information tab — THE only place the company group lives
-      description: "`GET /companies/{id}/information` — OBSERVED live 2026-09-13.\n\
-        \nRead-only probe on a production tenant, field NAMES only (no values):\n\n\
-        * **the group lives here and nowhere else** — `GET /companies` and\n  `GET\
-        \ /companies/{id}` only carry `agency`, `mainManager`, `pole`. This\n  tab\
-        \ adds `createdBy`, `files`, `influencers`, `parentCompany` and\n  `subsidiaries`\
-        \ (eight relationships in all).\n* **`parentCompany`** is `data: null` or\
-        \ `{id, type: \"company\"}` — set on\n  about 6 of 20 sampled companies.\n\
-        * **`subsidiaries`** is a LIST of `{id, type: \"company\"}`, empty when the\n\
-        \  company has none. Both directions are CONSISTENT: one group listed 16\n\
-        \  subsidiaries, each pointing back to it. The mock derives `subsidiaries`\n\
-        \  from `parentCompany` so the property holds by construction.\n* **27 attributes**;\
-        \ `included` carries types `agency`, `company`,\n  `resource`. Attribute types\
-        \ beyond those of the search are NOT observed\n  (`x-boond-confidence: unverified`)."
-      operationId: company_information_api_companies__item_id__information_get
+      summary: Contacts tab — the contacts of a company
+      description: '`GET /companies/{id}/contacts` — DOCUMENTED (`schemas/companies/contacts.json`),
+
+        not observed live: the contacts whose `company` relationship points to the
+
+        company, in the envelope of a list.'
+      operationId: company_contacts_api_companies__item_id__contacts_get
       parameters:
       - name: item_id
         in: path
@@ -3925,7 +5923,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ItemEnvelope_InformationSociete_'
+                $ref: '#/components/schemas/ListEnvelope_Contact_'
         '401':
           description: No credentials provided.
           content:
