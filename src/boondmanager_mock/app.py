@@ -277,7 +277,7 @@ def _collection_items(dataset_key: str) -> list[dict[str, Any]]:
 #  Application
 # ─────────────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="BoondManager mock", version="0.13.1", docs_url="/docs")
+app = FastAPI(title="BoondManager mock", version="0.14.0", docs_url="/docs")
 api = APIRouter(prefix="/api")
 
 
@@ -1068,6 +1068,13 @@ if settings.admin_enabled:
     from .admin import router as admin_router
 
     app.include_router(admin_router)
+
+# La vitrine en lecture seule, montée en dernier : ses chemins génériques
+# (`/{collection}`) ne doivent masquer aucune route déjà déclarée.
+if settings.ui_enabled:
+    from .ui import router as ui_router
+
+    app.include_router(ui_router)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

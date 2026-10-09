@@ -121,6 +121,22 @@ the group linkage lives**: `parentCompany` + `subsidiaries`, observed
 ² the `startMonth`/`endMonth` window is REQUIRED — 422 with business code 1017
 otherwise, as in production.
 
+## Seeing what the mock holds
+
+A read-only HTML explorer is served outside `/api` and outside the OpenAPI
+contract, under a red banner that says it is a mock:
+
+| Page | Shows |
+|---|---|
+| `/` | every collection and how many records it holds |
+| `/{collection}?q=…` | its records, newest first, with a full-text filter |
+| `/{collection}/{id}/information` | one record: attributes and linked records |
+
+The record path is the one of Boond's web interface, so a link built for the
+real Boond (`https://ui.boondmanager.com/opportunities/{id}/information`)
+opens here once its host points to the mock. Disable it with
+`BOOND_MOCK_UI_ENABLED=false`.
+
 ## Writing opportunities, companies, contacts and candidates
 
 The vendor's write routes, as declared in the RAML:

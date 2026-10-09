@@ -45,6 +45,8 @@ class Settings:
 
     # Plan de contrôle /__admin. Fermé par défaut : il n'a de sens qu'en test.
     admin_enabled: bool = False
+    # La vitrine HTML en lecture seule (`/`, `/{collection}`, `/{collection}/{id}/information`).
+    ui_enabled: bool = True
     admin_token: str = "mock-admin-token"
 
     # Ordre STABLE par défaut — aligné sur le comportement observé de la vraie
@@ -97,6 +99,7 @@ class Settings:
         )
         self.seed = int(os.environ.get("BOOND_MOCK_SEED", "42"))
         self.admin_enabled = _flag("BOOND_MOCK_ADMIN_ENABLED", False)
+        self.ui_enabled = _flag("BOOND_MOCK_UI_ENABLED", True)
         self.admin_token = os.environ.get("BOOND_MOCK_ADMIN_TOKEN", "mock-admin-token")
         self.stable_order = _flag("BOOND_MOCK_STABLE_ORDER", True)
         self.updated_since_enabled = _flag("BOOND_MOCK_UPDATED_SINCE", False)
