@@ -23,6 +23,7 @@ La surface reproduit les modules du fournisseur, CONFRONTÉE à la vraie API
 from __future__ import annotations
 
 import json
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -277,7 +278,7 @@ def _collection_items(dataset_key: str) -> list[dict[str, Any]]:
 #  Application
 # ─────────────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="BoondManager mock", version="0.14.0", docs_url="/docs")
+app = FastAPI(title="BoondManager mock", version="0.15.0", docs_url="/docs")
 api = APIRouter(prefix="/api")
 
 
@@ -342,6 +343,25 @@ def _societes_nommees(items: list[dict[str, Any]], keywords: str) -> list[dict[s
     return [i for i in items if cherche in str(i["attributes"].get("name", "")).lower()]
 
 
+def _titre_competences(items: list[dict[str, Any]], keywords: str) -> list[dict[str, Any]]:
+    """`keywordsType=titleSkills` — la recherche ne porte que sur le titre et
+    les compétences (`resources/{resources,candidates}/search.raml`).
+    Sémantique MESURÉE sur une instance réelle le 2026-10-16 : les mots sont
+    comparés entiers et sans casse ; une espace vaut OU, une virgule vaut ET
+    (« java react » ≥ « java », « java,react » ≤ « react »)."""
+    groupes = [[mot for mot in groupe.lower().split() if mot] for groupe in keywords.split(",")]
+    groupes = [groupe for groupe in groupes if groupe]
+    if not groupes:
+        return items
+
+    def mots(item: dict[str, Any]) -> set[str]:
+        attributs = item.get("attributes", {})
+        texte = f"{attributs.get('title') or ''} {attributs.get('skills') or ''}".lower()
+        return set(re.findall(r"[\w#+.]+", texte)) | set(re.findall(r"\w+", texte))
+
+    return [i for i in items if all(any(mot in mots(i) for mot in groupe) for groupe in groupes)]
+
+
 def _paginated(request: Request, spec: CollectionSpec) -> JSONResponse:
     path_name, dataset_key = spec.chemin, spec.cle_dataset
     params = dict(request.query_params)
@@ -361,6 +381,8 @@ def _paginated(request: Request, spec: CollectionSpec) -> JSONResponse:
         items = [i for i in items if debut <= i["attributes"].get("term", "") <= fin]
     if spec.chemin == "companies" and params.get("keywordsType") == "name":
         items = _societes_nommees(items, params.get("keywords", ""))
+    elif spec.chemin in ("resources", "candidates") and params.get("keywordsType") == "titleSkills":
+        items = _titre_competences(items, params.get("keywords", ""))
     else:
         items = apply_keywords(items, params.get("keywords", ""), state.blobs(dataset_key))
     # Une valeur de `period` absente de `spec.periodes` est acceptée et

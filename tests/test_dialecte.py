@@ -324,6 +324,41 @@ def test_filtres_metier_inconnus_ignores(client):
     assert corps["meta"]["totals"]["rows"] == 34
 
 
+def _total(client, chemin: str, **params: str) -> int:
+    corps = client.get(chemin, headers=JWT, params={"maxResults": 500, **params}).json()
+    return corps["meta"]["totals"]["rows"]
+
+
+def test_title_skills_ne_cherche_que_dans_le_titre_et_les_competences(client):
+    """`keywordsType=titleSkills` : un prénom n'est ni un titre ni une compétence."""
+    premiere = client.get("/api/resources?maxResults=1", headers=JWT).json()["data"][0]
+    prenom = premiere["attributes"]["firstName"]
+    assert _total(client, "/api/resources", keywords=prenom) >= 1
+    assert _total(client, "/api/resources", keywordsType="titleSkills", keywords=prenom) == 0
+
+
+def test_title_skills_espace_vaut_ou_et_virgule_vaut_et(client):
+    """Mesuré sur une instance réelle le 2026-10-16 : « java react » rend au
+    moins autant que chacun, « java,react » au plus autant que le moins
+    fréquent."""
+    for chemin in ("/api/resources", "/api/candidates"):
+        a = _total(client, chemin, keywordsType="titleSkills", keywords="react")
+        b = _total(client, chemin, keywordsType="titleSkills", keywords="python")
+        ou = _total(client, chemin, keywordsType="titleSkills", keywords="react python")
+        et = _total(client, chemin, keywordsType="titleSkills", keywords="react,python")
+        assert a > 0
+        assert ou >= max(a, b)
+        assert et <= min(a, b)
+
+
+def test_title_skills_compare_des_mots_entiers_sans_casse(client):
+    """« REACT » trouve « React » ; « reac » ne trouve rien."""
+    assert _total(client, "/api/resources", keywordsType="titleSkills", keywords="REACT") == _total(
+        client, "/api/resources", keywordsType="titleSkills", keywords="react"
+    )
+    assert _total(client, "/api/resources", keywordsType="titleSkills", keywords="reac") == 0
+
+
 # ── Récupération des contrats — le chemin officiel ──────────────────────────
 
 

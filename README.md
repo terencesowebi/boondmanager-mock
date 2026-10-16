@@ -157,6 +157,10 @@ whose `company` relationship points to the company (documented, not observed
 live), and `GET /api/companies?keywordsType=name&keywords=…` searches the name
 only, as the RAML describes, where the default searches every field.
 
+`GET /api/resources` and `GET /api/candidates` with `keywordsType=titleSkills`
+search the title and skills only, as measured on a real instance (2026-10-16):
+whole words, case-insensitive, a **space means OR** and a **comma means AND**.
+
 JSON:API bodies (`{"data": {"type", "attributes", "relationships"}}`; a `PUT`
 also carries `data.id`). Both answer **200 with the profile**, as the RAML
 declares — not 201.
