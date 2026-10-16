@@ -8,6 +8,7 @@ si bien qu'un lien vers une fiche, forgé pour le vrai Boond, s'ouvre aussi ici.
 from __future__ import annotations
 
 import json
+import re
 from html import escape
 from typing import Any
 
@@ -19,16 +20,34 @@ from .state import state
 router = APIRouter(include_in_schema=False)
 
 _STYLE = """
-body{font-family:system-ui,sans-serif;margin:0;background:#fafafa;color:#222}
+:root{--fond:#f6f7f9;--carte:#fff;--trait:#e3e6eb;--texte:#1f2328;--doux:#667085;--lien:#1d4ed8}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;background:var(--fond);
+  color:var(--texte);line-height:1.5}
 .bandeau{background:#b42318;color:#fff;padding:12px 16px;font-weight:600}
 .bandeau small{display:block;font-weight:400;opacity:.9;margin-top:4px}
-main{padding:16px;max-width:1200px;margin:auto}
-table{border-collapse:collapse;width:100%;background:#fff}
-th,td{border:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top;font-size:14px}
-th{background:#f0f0f0}
-a{color:#1d4ed8}
+main{padding:24px 16px;max-width:1100px;margin:auto}
+h1{font-size:1.6rem;margin:.2rem 0 .3rem}
+h2{font-size:1rem;margin:2rem 0 .6rem;color:var(--doux);font-weight:600}
+.meta{color:var(--doux);font-size:.9rem;margin:0}
+table{border-collapse:collapse;width:100%;background:var(--carte);border:1px solid var(--trait);
+  border-radius:8px;overflow:hidden}
+th,td{border-bottom:1px solid var(--trait);padding:8px 12px;text-align:left;vertical-align:top;
+  font-size:14px}
+tr:last-child th,tr:last-child td{border-bottom:0}
+th{background:#f9fafb;font-weight:600;width:14rem;color:var(--doux)}
+a{color:var(--lien);overflow-wrap:anywhere}
+.texte{background:var(--carte);border:1px solid var(--trait);border-radius:8px;padding:14px 16px;
+  white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;max-width:75ch}
+.valeur{white-space:pre-wrap;overflow-wrap:anywhere}
+.vide{color:#98a2b3}
+.puce{display:inline-block;background:#eef2f6;border-radius:999px;padding:1px 10px;
+  margin:1px 4px 1px 0;font-size:13px}
 pre{white-space:pre-wrap;margin:0;font-size:13px}
+details{margin-top:1.5rem}
+summary{cursor:pointer;color:var(--doux)}
 form{margin:12px 0}
+@media (max-width:640px){th{width:auto}}
 """
 
 _BANDEAU = (
@@ -92,9 +111,23 @@ def fiche(chemin: str, item_id: str) -> HTMLResponse:
         return _page(
             "Introuvable", f"<p>Fiche introuvable : {escape(chemin)} #{escape(item_id)}</p>"
         )
+    tous = element.get("attributes") or {}
+    textes = {nom: v for nom, v in tous.items() if _est_texte_long(v)}
+    remplis = {nom: v for nom, v in tous.items() if nom not in textes and not _est_vide(v)}
+    vides = [nom for nom, v in tous.items() if nom not in textes and _est_vide(v)]
+    blocs_texte = "".join(
+        f"<h2>{escape(nom)}</h2><div class='texte'>{_texte(valeur)}</div>"
+        for nom, valeur in textes.items()
+    )
     attributs = "".join(
-        f"<tr><th>{escape(nom)}</th><td><pre>{escape(_json(valeur))}</pre></td></tr>"
-        for nom, valeur in (element.get("attributes") or {}).items()
+        f"<tr><th>{escape(nom)}</th><td>{_valeur(valeur)}</td></tr>"
+        for nom, valeur in remplis.items()
+    )
+    champs_vides = (
+        f"<details><summary>Champs vides ({len(vides)})</summary>"
+        f"<p class='meta'>{escape(', '.join(vides))}</p></details>"
+        if vides
+        else ""
     )
     relations = "".join(
         f"<tr><th>{escape(nom)}</th><td>{_relation(valeur)}</td></tr>"
@@ -103,9 +136,44 @@ def fiche(chemin: str, item_id: str) -> HTMLResponse:
     return _page(
         f"{chemin} #{item_id}",
         f"<p><a href='/{chemin}'>← {escape(chemin)}</a></p><h1>{escape(_libelle(element))}</h1>"
-        f"<h2>Attributs</h2><table>{attributs}</table>"
-        f"<h2>Relations</h2><table>{relations}</table>",
+        f"<p class='meta'>{escape(str(element.get('type', chemin)))} #{escape(item_id)}</p>"
+        f"{blocs_texte}<h2>Attributs</h2><table>{attributs}</table>{champs_vides}"
+        f"<h2>Relations</h2><table>{relations or '<tr><td class=vide>—</td></tr>'}</table>",
     )
+
+
+_URL = re.compile(r"https?://[^\s<]*[^\s<.,;:)\]]")
+
+
+def _est_vide(valeur: Any) -> bool:
+    return valeur is None or valeur in ("", [], {})
+
+
+def _est_texte_long(valeur: Any) -> bool:
+    """Une description, des compétences : un texte qu'on lit, pas une valeur qu'on repère."""
+    return isinstance(valeur, str) and ("\n" in valeur or len(valeur) > 120)
+
+
+def _texte(valeur: str) -> str:
+    """Le texte tel qu'il a été saisi, retours à la ligne compris, avec ses liens cliquables."""
+    return _URL.sub(lambda m: f"<a href='{m.group(0)}'>{m.group(0)}</a>", escape(valeur))
+
+
+def _valeur(valeur: Any) -> str:
+    if isinstance(valeur, bool):
+        return "oui" if valeur else "non"
+    if isinstance(valeur, (int, float)):
+        return escape(str(valeur))
+    if isinstance(valeur, str):
+        return f"<span class='valeur'>{_texte(valeur)}</span>"
+    if isinstance(valeur, list) and all(isinstance(v, (str, int, float)) for v in valeur):
+        return "".join(f"<span class='puce'>{escape(str(v))}</span>" for v in valeur)
+    if isinstance(valeur, dict) and all(not isinstance(v, (dict, list)) for v in valeur.values()):
+        return "<br>".join(
+            f"<span class='meta'>{escape(str(cle))} :</span> {'—' if _est_vide(v) else _valeur(v)}"
+            for cle, v in valeur.items()
+        )
+    return f"<pre>{escape(_json(valeur))}</pre>"
 
 
 def _page(titre: str, corps: str) -> HTMLResponse:

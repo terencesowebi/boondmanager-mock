@@ -54,6 +54,36 @@ def test_une_fiche_s_ouvre_au_chemin_de_l_interface_boond(client) -> None:
     assert "malt::ao-1" in page.text
 
 
+def test_une_fiche_se_lit_comme_un_texte(client) -> None:
+    """Retours à la ligne interprétés, liens cliquables, valeurs sans guillemets
+    JSON, champs vides rangés à part."""
+    description = "Refonte du SI.\n\nClient : ENGIE\n\nAnnonce :\nhttps://malt.fr/ao-42."
+    cree = client.post(
+        "/api/opportunities",
+        json={"data": {"type": "opportunity", "attributes": {"title": "Dev Java"}}},
+        headers=JWT,
+    ).json()["data"]
+    client.put(
+        f"/api/opportunities/{cree['id']}/information",
+        json={
+            "data": {
+                "id": cree["id"],
+                "type": "opportunity",
+                "attributes": {"description": description},
+            }
+        },
+        headers=JWT,
+    )
+
+    page = client.get(f"/opportunities/{cree['id']}/information").text
+
+    assert "<div class='texte'>Refonte du SI.\n\nClient : ENGIE" in page
+    assert "\\n" not in page
+    assert "<a href='https://malt.fr/ao-42'>https://malt.fr/ao-42</a>." in page
+    assert "<span class='valeur'>Dev Java</span>" in page
+    assert "Champs vides" in page
+
+
 def test_une_fiche_inconnue_le_dit(client) -> None:
     assert "Fiche introuvable" in client.get("/opportunities/999999/information").text
     assert "Collection inconnue" in client.get("/inconnue").text
