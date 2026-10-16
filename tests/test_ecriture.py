@@ -251,3 +251,56 @@ def test_retrouver_une_opportunite_par_sa_reference(client) -> None:
     trouvees = client.get("/api/opportunities?keywords=malt::ao-4242", headers=JWT).json()["data"]
 
     assert [o["attributes"]["reference"] for o in trouvees] == ["malt::ao-4242"]
+
+
+def test_l_onglet_technique_d_un_candidat_porte_son_titre_et_ses_competences(client) -> None:
+    """La création refuse le titre et les compétences : ils passent par l'onglet
+    technique, validé par le schéma officiel `technicalDataBodyPut.json`."""
+    cree = client.post(
+        "/api/candidates",
+        json={
+            "data": {"type": "candidate", "attributes": {"firstName": "Léa", "lastName": "Martin"}}
+        },
+        headers=JWT,
+    ).json()["data"]
+
+    reponse = client.put(
+        f"/api/candidates/{cree['id']}/technical-data",
+        json={
+            "data": {
+                "id": cree["id"],
+                "type": "candidate",
+                "attributes": {
+                    "title": "Développeuse Java",
+                    "skills": "Java, Kafka",
+                    "experience": 2,
+                },
+            }
+        },
+        headers=JWT,
+    )
+
+    assert reponse.status_code == 200
+    relu = client.get(f"/api/candidates/{cree['id']}", headers=JWT).json()["data"]["attributes"]
+    assert relu["title"] == "Développeuse Java"
+    assert relu["skills"] == "Java, Kafka"
+
+
+def test_l_onglet_technique_refuse_un_attribut_hors_schema(client) -> None:
+    cree = client.post(
+        "/api/candidates",
+        json={
+            "data": {"type": "candidate", "attributes": {"firstName": "Léa", "lastName": "Martin"}}
+        },
+        headers=JWT,
+    ).json()["data"]
+
+    reponse = client.put(
+        f"/api/candidates/{cree['id']}/technical-data",
+        json={
+            "data": {"id": cree["id"], "type": "candidate", "attributes": {"email1": "lea@acme.fr"}}
+        },
+        headers=JWT,
+    )
+
+    assert reponse.status_code == 422

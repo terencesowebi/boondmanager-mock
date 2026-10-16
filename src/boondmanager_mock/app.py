@@ -22,6 +22,7 @@ La surface reproduit les modules du fournisseur, CONFRONTÉE à la vraie API
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import re
 import time
@@ -278,7 +279,7 @@ def _collection_items(dataset_key: str) -> list[dict[str, Any]]:
 #  Application
 # ─────────────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="BoondManager mock", version="0.15.1", docs_url="/docs")
+app = FastAPI(title="BoondManager mock", version="0.16.0", docs_url="/docs")
 api = APIRouter(prefix="/api")
 
 
@@ -703,6 +704,33 @@ def _register_ecriture(ecriture: SpecEcriture) -> None:
 
 for _ecriture in ECRITURES:
     _register_ecriture(_ecriture)
+
+_DONNEES_TECHNIQUES_CANDIDAT = dataclasses.replace(
+    next(e for e in ECRITURES if e.chemin == "candidates"),
+    schema_modification="candidates-technical-data-put.json",
+)
+
+
+@api.put(
+    "/candidates/{item_id}/technical-data",
+    name="update_candidates_technical_data",
+    response_model=ItemEnvelope[Candidat],
+    responses=REPONSES_ERREUR,
+    summary="Update technical data: candidate",
+    openapi_extra=_corps_documente(_DONNEES_TECHNIQUES_CANDIDAT.schema_modification),
+)
+async def modifier_donnees_techniques_candidat(request: Request, item_id: str) -> JSONResponse:
+    """`PUT /candidates/{id}/technical-data` — schéma officiel `technicalDataBodyPut.json`
+    recopié tel quel. Le titre, les compétences et l'expérience ne se donnent qu'ici :
+    la création les refuse."""
+    return await _ecrire(
+        request,
+        _DONNEES_TECHNIQUES_CANDIDAT,
+        f"/api/candidates/{item_id}/technical-data",
+        lambda corps: modifier(
+            _DONNEES_TECHNIQUES_CANDIDAT, state.dataset, state.index_entites(), item_id, corps
+        ),
+    )
 
 
 @api.get(

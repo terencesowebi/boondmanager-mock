@@ -151,6 +151,7 @@ The vendor's write routes, as declared in the RAML:
 | `PUT /api/contacts/{id}/information` | updates its information tab |
 | `POST /api/candidates` | creates a candidate (`firstName`, `lastName` required) |
 | `PUT /api/candidates/{id}/information` | updates its information tab |
+| `PUT /api/candidates/{id}/technical-data` | updates its technical tab (`title`, `skills`, `experience`…), which creation refuses |
 
 Two reads go with them: `GET /api/companies/{id}/contacts` lists the contacts
 whose `company` relationship points to the company (documented, not observed

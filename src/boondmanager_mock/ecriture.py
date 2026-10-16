@@ -6,6 +6,7 @@ Les routes du fournisseur (RAML officiel) :
   PUT  /api/opportunities/{id}/information    modifie son onglet « information »
   POST /api/candidates                        crée un candidat
   PUT  /api/candidates/{id}/information       modifie son onglet « information »
+  PUT  /api/candidates/{id}/technical-data    modifie son onglet technique (titre, compétences…)
 
 Les deux répondent **200** avec la fiche, pas 201 : c'est ce que déclare le
 RAML (`resourceTypes/search.raml`, `resourceTypes/base.raml`).

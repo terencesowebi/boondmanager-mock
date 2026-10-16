@@ -1,0 +1,319 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "description": "Candidate's technical data sent in the body with a PUT method",
+    "type": "object",
+    "properties": {
+        "data": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$",
+                    "database": "TAB_PROFIL.ID_PROFIL"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "candidate"
+                    ]
+                },
+                "attributes": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string",
+                            "maxLength": 150,
+                            "database": "TAB_DT.DT_TITRE"
+                        },
+                        "summary": {
+                            "type": "string",
+                            "maxLength": 1000,
+                            "database": "TAB_DT.DT_RESUME"
+                        },
+                        "skills": {
+                            "type": "string",
+                            "database": "TAB_DT.COMP_COMPETENCE"
+                        },
+                        "experience": {
+                            "type": "integer",
+                            "minimum": -1,
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.experience"
+                            },
+                            "database": "TAB_DT.DT_EXPERIENCE"
+                        },
+                        "training": {
+                            "type": "string",
+                            "links": {
+                                "rel": "describedBy",
+                                "href": "/api/application/dictionary/setting.training"
+                            },
+                            "database": "TAB_DT.DT_FORMATION"
+                        },
+                        "languages": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of languages",
+                                "type": "object",
+                                "properties": {
+                                    "language": {
+                                        "anyOf": [
+                                            {
+                                                "description": "Language spoken {id}",
+                                                "type": "string",
+                                                "maxLength": 30,
+                                                "links": {
+                                                    "rel": "describedBy",
+                                                    "href": "/api/application/dictionary/setting.languageSpoken"
+                                                }
+                                            },
+                                            {
+                                                "description": "Customized language spoken",
+                                                "type": "string",
+                                                "maxLength": 30
+                                            }
+                                        ]
+                                    },
+                                    "level": {
+                                        "description": "Language level {id}",
+                                        "type": "string",
+                                        "links": {
+                                            "rel": "describedBy",
+                                            "href": "/api/application/dictionary/setting.languageLevel"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "language",
+                                    "level"
+                                ],
+                                "additionalProperties": false
+                            },
+                            "database": "TAB_DT.DT_LANGUES"
+                        },
+                        "diplomas": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of diploma",
+                                "type": "string"
+                            },
+                            "database": "TAB_DT.DT_DIPLOMES"
+                        },
+                        "tools": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of tools",
+                                "type": "object",
+                                "properties": {
+                                    "tool": {
+                                        "description": "Tool {id}",
+                                        "type": "string",
+                                        "links": {
+                                            "rel": "describedBy",
+                                            "href": "/api/application/dictionary/setting.tool"
+                                        }
+                                    },
+                                    "level": {
+                                        "description": "Tool level",
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 5
+                                    }
+                                },
+                                "required": [
+                                    "tool",
+                                    "level"
+                                ],
+                                "additionalProperties": false
+                            },
+                            "database": "TAB_DT.DT_OUTILS"
+                        },
+                        "activityAreas": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of activity area {id}",
+                                "type": "string",
+                                "links": {
+                                    "rel": "describedBy",
+                                    "href": "/api/application/dictionary/setting.activityArea"
+                                }
+                            },
+                            "database": "TAB_DT.COMP_APPLICATIONS"
+                        },
+                        "expertiseAreas": {
+                            "type": "array",
+                            "items": {
+                                "description": "List of expertise area {id}",
+                                "type": "string",
+                                "links": {
+                                    "rel": "describedBy",
+                                    "href": "/api/application/dictionary/setting.expertiseArea"
+                                }
+                            },
+                            "database": "TAB_DT.COMP_INTERVENTIONS"
+                        },
+                        "references": {
+                            "description": "List of references",
+                            "type": "array",
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "description": "Create a reference",
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "pattern": "^[1-9][0-9]*$",
+                                                "database": "TAB_REFERENCE.ID_REFERENCE"
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "maxLength": 150,
+                                                "database": "TAB_REFERENCE.REF_TITRE"
+                                            },
+                                            "company": {
+                                                "type": "string",
+                                                "maxLength": 100,
+                                                "database": "TAB_REFERENCE.REF_SOCIETE"
+                                            },
+                                            "location": {
+                                                "type": "string",
+                                                "maxLength": 100,
+                                                "database": "TAB_REFERENCE.REF_LIEU"
+                                            },
+                                            "startMonth": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_DEBUT_MOIS"
+                                            },
+                                            "startYear": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_DEBUT_ANNEE"
+                                            },
+                                            "endMonth": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_FIN_MOIS"
+                                            },
+                                            "endYear": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_FIN_ANNEE"
+                                            },
+                                            "skills": {
+                                                "type": "string",
+                                                "maxLength": 250,
+                                                "database": "TAB_REFERENCE.REF_COMPETENCES"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "maxLength": 65500,
+                                                "database": "TAB_REFERENCE.REF_DESCRIPTION"
+                                            },
+                                            "startDate": {
+                                                "type": "string"
+                                            },
+                                            "endDate": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "title",
+                                            "description"
+                                        ],
+                                        "additionalProperties": false
+                                    },
+                                    {
+                                        "description": "Update a reference",
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "pattern": "^[1-9][0-9]*$",
+                                                "database": "TAB_REFERENCE.ID_REFERENCE"
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "maxLength": 150,
+                                                "database": "TAB_REFERENCE.REF_TITRE"
+                                            },
+                                            "company": {
+                                                "type": "string",
+                                                "maxLength": 100,
+                                                "database": "TAB_REFERENCE.REF_SOCIETE"
+                                            },
+                                            "location": {
+                                                "type": "string",
+                                                "maxLength": 100,
+                                                "database": "TAB_REFERENCE.REF_LIEU"
+                                            },
+                                            "startMonth": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_DEBUT_MOIS"
+                                            },
+                                            "startYear": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_DEBUT_ANNEE"
+                                            },
+                                            "endMonth": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_FIN_MOIS"
+                                            },
+                                            "endYear": {
+                                                "type": "string",
+                                                "database": "TAB_REFERENCE.REF_FIN_ANNEE"
+                                            },
+                                            "skills": {
+                                                "type": "string",
+                                                "maxLength": 250,
+                                                "database": "TAB_REFERENCE.REF_COMPETENCES"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "maxLength": 65500,
+                                                "database": "TAB_REFERENCE.REF_DESCRIPTION"
+                                            },
+                                            "startDate": {
+                                                "type": "string"
+                                            },
+                                            "endDate": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "id",
+                                            "title",
+                                            "description"
+                                        ],
+                                        "additionalProperties": false
+                                    }
+                                ]
+                            }
+                        },
+                        "createLink": {
+                            "type": "boolean",
+                            "description": "true to create public link of technical data profile"
+                        },
+                        "deleteLink": {
+                            "type": "boolean",
+                            "description": "true to delete public link of technical data profile"
+                        },
+                        "updatedFromAIPortrait": {
+                            "type": "boolean",
+                            "description": "true when the values come from the AI portrait suggestions, which the activity log then states"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "additionalProperties": false,
+    "id": "schemas/candidates/technicalDataBodyPut.json"
+}
